@@ -1,0 +1,1492 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>文件及影像掃描系統</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+/* ══ RESET & BASE ══ */
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  /* ── 三大主色 ── */
+  --brn:#825b42;   /* 暖棕：主要按鈕、強調色 */
+  --olive:#777435; /* 橄欖：次要強調、圖示 */
+  --dk:#2e3d45;    /* 深青灰：標題列、頁首 */
+
+  /* ── 衍生色 ── */
+  --brn2:#6e4c37;          /* 暖棕深：hover */
+  --mid:#3d5060;           /* 深青灰中：次層背景 */
+  --cream:#e8d9c8;         /* 米白：深色背景上的文字 */
+  --tan:#c9b99a;           /* 淡棕：副文字 */
+
+  /* ── 背景 & 卡片（淺色系） ── */
+  --bg:#f5f2ee;            /* 頁面背景：極淡暖米 */
+  --bg2:#edeae4;           /* 次要背景 */
+  --card:#ffffff;          /* 卡片白 */
+  --card2:#faf8f5;         /* 輸入框背景 */
+
+  /* ── 邊框 ── */
+  --bd:#ddd8d0;
+  --bd2:#ece8e1;
+
+  /* ── 文字 ── */
+  --txt:#1e1e1b;
+  --txt2:#5a5650;
+
+  /* ── 功能色 ── */
+  --green-bg:#eaf5ef;--green-bd:#b0d8b8;--green-txt:#27500a;
+  --warn-bg:#fdf5e8;--warn-bd:#f0c090;--warn-txt:#854f0b;
+  --err:#c04020;
+  --locked:#ebe8e2;
+  --local-bg:#e6f0e8;--local-bd:#a8d4b0;--local-txt:#1f5c2a;
+}
+body{font-family:Arial,'Microsoft JhengHei','微軟正黑體',sans-serif;background:var(--bg);color:var(--txt);font-size:15px;min-height:100vh;-webkit-font-smoothing:antialiased;}
+button{cursor:pointer;font-family:inherit;}
+input,select,textarea{font-family:inherit;}
+
+/* ══ APP SHELL ══ */
+.app{display:flex;flex-direction:column;min-height:100vh;max-width:520px;margin:0 auto;background:var(--bg);position:relative;box-shadow:0 0 40px rgba(46,61,69,0.10);}
+
+/* ══ SCREEN VISIBILITY ══ */
+.hidden{display:none!important;}
+
+/* ══ LOGIN ══ */
+.s-login{min-height:100vh;background:linear-gradient(160deg,var(--dk) 0%,#1a282f 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2rem 1.5rem;}
+.login-logo{text-align:center;margin-bottom:2.5rem;}
+.login-logo-icon{width:72px;height:72px;background:rgba(119,116,53,0.25);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;}
+.login-logo-icon i{font-size:38px;color:var(--olive);}
+.login-sysname{color:var(--cream);font-size:20px;font-weight:700;letter-spacing:1px;}
+.login-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:18px;padding:2rem 1.5rem;width:100%;max-width:360px;}
+.login-hint{color:rgba(200,185,170,0.7);font-size:13px;text-align:center;margin-bottom:1.5rem;}
+.lf{margin-bottom:14px;}
+.lf label{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--tan);font-weight:600;margin-bottom:6px;letter-spacing:0.5px;}
+.lf label i{font-size:14px;}
+.lf-wrap{position:relative;}
+.lf input{width:100%;padding:12px 14px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:10px;color:var(--cream);font-size:15px;outline:none;transition:border-color .15s;}
+.lf input:focus{border-color:var(--brn);background:rgba(255,255,255,0.11);}
+.lf input::placeholder{color:rgba(200,185,170,0.35);}
+.lf-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:rgba(200,185,170,0.4);font-size:18px;padding:4px;display:flex;align-items:center;}
+.lf-eye:hover{color:var(--tan);}
+.login-err{background:rgba(192,64,32,0.15);border:1px solid rgba(192,64,32,0.3);border-radius:8px;padding:8px 12px;color:#f08080;font-size:13px;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+.btn-login{width:100%;padding:14px;background:var(--brn);color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s;}
+.btn-login:hover{background:var(--brn2);}
+.btn-login i{font-size:20px;}
+.login-footer{color:rgba(100,120,130,0.6);font-size:12px;margin-top:2rem;text-align:center;}
+
+/* ══ HEADER ══ */
+.hdr{background:var(--dk);height:52px;display:flex;align-items:center;padding:0 12px;gap:8px;border-bottom:2.5px solid var(--olive);flex-shrink:0;position:sticky;top:0;z-index:100;}
+.hdr-back{background:none;border:none;color:#a0b8c4;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;transition:background .15s;}
+.hdr-back:hover{background:rgba(255,255,255,0.1);}
+.hdr-title{flex:1;color:var(--cream);font-size:15px;font-weight:700;background:none;border:none;text-align:left;padding:0;cursor:pointer;transition:opacity .15s;}
+.hdr-title:hover{opacity:.75;}
+.hdr-icon{color:var(--olive);font-size:22px;}
+
+/* ══ HOME ══ */
+.s-home{flex:1;display:flex;flex-direction:column;}
+.home-topbar{background:var(--mid);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;}
+.home-user{display:flex;align-items:center;gap:10px;}
+.home-avatar{width:34px;height:34px;background:var(--brn);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700;flex-shrink:0;}
+.home-uname{color:var(--cream);font-size:13px;font-weight:700;}
+.home-urole{color:var(--tan);font-size:11px;}
+.btn-logout{background:none;border:1px solid rgba(255,255,255,0.18);border-radius:7px;color:var(--tan);font-size:12px;padding:5px 10px;display:flex;align-items:center;gap:5px;}
+.btn-logout:hover{background:rgba(255,255,255,0.08);color:var(--cream);}
+.home-body{flex:1;padding:1.25rem 1rem;display:flex;flex-direction:column;gap:14px;}
+.home-greet{text-align:center;padding:0.25rem 0 0.5rem;}
+.home-greet-t{font-size:15px;font-weight:700;color:var(--dk);}
+.home-fn-btn{width:100%;border:none;border-radius:18px;padding:1.75rem 1.25rem;display:flex;flex-direction:column;align-items:center;gap:14px;transition:all .18s;position:relative;overflow:hidden;}
+.home-fn-btn:active{transform:scale(.98);}
+.home-fn-btn::after{content:'';position:absolute;inset:0;background:rgba(255,255,255,0);transition:background .15s;}
+.home-fn-btn:hover::after{background:rgba(255,255,255,0.08);}
+.fn-seal{background:linear-gradient(145deg,#2e3d45,#3d5060);}
+.fn-open{background:linear-gradient(145deg,#3b5e2b,#4e7a3a);}
+.fn-arch{background:linear-gradient(145deg,#825b42,#9c6e50);}
+.home-fn-ico{width:72px;height:72px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;}
+.home-fn-ico i{font-size:36px;color:#fff;}
+.home-fn-name{font-size:22px;font-weight:800;color:#fff;}
+.home-fn-desc{font-size:12px;color:rgba(255,255,255,0.65);text-align:center;line-height:1.5;}
+.home-foot{color:#aaa;font-size:11px;text-align:center;padding:.75rem;}
+
+/* ══ SUB HEADER + STEP BAR ══ */
+.s-sub{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+.stepbar{display:flex;background:var(--mid);flex-shrink:0;}
+.step{flex:1;padding:8px 4px;text-align:center;font-size:11px;color:#7a9aaa;border-bottom:3px solid transparent;font-weight:600;}
+.step i{font-size:14px;display:block;margin-bottom:2px;}
+.step.active{color:var(--cream);border-bottom-color:var(--brn);background:var(--dk);}
+.step.done{color:#a0c4a0;border-bottom-color:var(--olive);}
+.sub-body{flex:1;overflow-y:auto;padding:1rem;background:var(--bg);}
+
+/* ══ MENU SCREENS ══ */
+.s-menu{flex:1;overflow-y:auto;background:var(--bg);}
+.menu-body{padding:1rem;}
+.menu-section{margin-bottom:1.25rem;}
+.msec-hd{background:var(--brn);color:#f5ede3;font-size:14px;font-weight:700;padding:11px 16px;border-radius:12px 12px 0 0;display:flex;align-items:center;gap:8px;}
+.msec-hd i{font-size:17px;}
+.msec-body{background:var(--card);border:0.5px solid var(--bd);border-radius:0 0 12px 12px;overflow:hidden;}
+.mitem{display:flex;align-items:center;gap:12px;padding:15px 16px;width:100%;background:none;border:none;text-align:left;font-size:15px;color:var(--txt);border-bottom:.5px solid var(--bd2);transition:background .12s;}
+.mitem:last-child{border-bottom:none;}
+.mitem:hover{background:#edeae4;}
+.mitem i.mico{font-size:20px;color:var(--olive);}
+.mitem-txt{flex:1;}
+.mitem-badge{font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600;}
+.badge-photo{background:#e8f0eb;color:#3b6d11;}
+.badge-label{background:#f3ece4;color:#6b4530;}
+.mitem-arr{color:#ccc;font-size:17px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;padding:12px;}
+.tile{border-radius:10px;padding:16px 8px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;border:none;width:100%;transition:all .15s;}
+.tile i{font-size:26px;}
+.tile-name{font-size:13px;font-weight:700;text-align:center;line-height:1.3;}
+.tile-photo{background:#e9ede8;color:var(--dk);border:1.5px solid #bcc8b8;}
+.tile-photo:hover{background:#d8e4d4;}
+.tile-label{background:#f2ebe3;color:var(--brn2);border:1.5px solid #cdb8a4;}
+.tile-label:hover{background:#e6d3c2;}
+.tile-arch{background:#f4f0ea;color:var(--dk);border:1.5px solid #ccc6bc;}
+.tile-arch:hover{background:#ece4d8;border-color:var(--brn);}
+.tile:active{transform:scale(.97);}
+.menu-foot{color:#aaa;font-size:11px;text-align:center;padding:.75rem;}
+
+/* ══ CARDS & FIELDS ══ */
+.card{background:var(--card);border:.5px solid var(--bd);border-radius:12px;overflow:hidden;margin-bottom:1rem;}
+.card-hd{background:var(--brn);color:#f5ede3;font-size:14px;font-weight:700;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;}
+.card-hd-l{display:flex;align-items:center;gap:8px;}
+.card-hd i{font-size:17px;}
+.card-bd{padding:1rem;}
+.field{margin-bottom:13px;}
+.field:last-child{margin-bottom:0;}
+.field label{display:block;font-size:12px;color:#5a4535;font-weight:700;margin-bottom:5px;}
+.req{color:var(--err);margin-left:2px;}
+.field input,.field select,.field textarea{width:100%;padding:10px 12px;border:.5px solid #c0b8ac;border-radius:8px;font-size:15px;color:var(--txt);background:var(--card2);}
+.field input:focus,.field select:focus,.field textarea:focus{outline:none;border-color:var(--brn);background:#fff;}
+.field textarea{resize:vertical;line-height:1.6;}
+.field-local input{background:var(--local-bg);color:var(--local-txt);border-color:var(--local-bd);cursor:not-allowed;}
+.field-locked input{background:var(--locked);color:#888;border-color:var(--bd);cursor:not-allowed;}
+.field-blank input{background:var(--locked);color:#aaa;border-color:var(--bd);cursor:not-allowed;}
+.tag-local{display:inline-block;background:var(--dk);color:var(--cream);font-size:10px;padding:1px 7px;border-radius:8px;margin-left:4px;font-weight:600;vertical-align:middle;}
+.tag-blank{display:inline-block;background:var(--bd);color:#666;font-size:10px;padding:1px 7px;border-radius:8px;margin-left:4px;font-weight:600;vertical-align:middle;}
+.tag-req{display:inline-block;background:var(--local-bg);color:var(--local-txt);font-size:10px;padding:1px 7px;border-radius:8px;margin-left:4px;font-weight:600;vertical-align:middle;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.char-count{font-size:11px;color:#999;text-align:right;margin-top:3px;}
+.char-over{color:var(--err);}
+.hint{font-size:11px;color:#999;margin-top:4px;}
+.divider{font-size:11px;color:var(--olive);font-weight:700;margin:4px 0 12px;display:flex;align-items:center;gap:8px;}
+.divider::after{content:'';flex:1;height:.5px;background:var(--bd);}
+
+/* ══ BUTTONS ══ */
+.btn-p{width:100%;padding:14px;background:var(--brn);color:#fff;border:none;border-radius:8px;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-p:hover{background:var(--brn2);}
+.btn-p i{font-size:19px;}
+.btn-s{width:100%;padding:13px;background:var(--card);color:var(--dk);border:1.5px solid var(--dk);border-radius:8px;font-size:15px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:10px;}
+.btn-s:hover{background:var(--bg2);}
+.btn-s i{font-size:18px;}
+.btn-lk{padding:10px 14px;background:var(--dk);color:var(--cream);border:none;border-radius:8px;font-size:13px;font-weight:700;display:flex;align-items:center;gap:5px;flex-shrink:0;}
+.btn-lk:hover{background:var(--mid);}
+
+/* ══ SHOP BUTTONS ══ */
+.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.shop-btn{padding:14px 8px;border:1.5px solid var(--bd);border-radius:10px;background:var(--card2);display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;border:1.5px solid var(--bd);}
+.shop-btn.selected{border-color:var(--brn);background:#f3ece4;}
+.shop-btn:hover{border-color:var(--brn);background:#fdf6f0;}
+.shop-code{font-size:18px;font-weight:700;color:var(--brn);}
+.shop-name{font-size:11px;color:#777;text-align:center;line-height:1.3;}
+
+/* ══ MODE TOGGLE ══ */
+.mode-toggle{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid var(--brn);border-radius:10px;overflow:hidden;}
+.mode-btn{padding:13px 8px;border:none;font-size:13px;font-weight:700;display:flex;flex-direction:column;align-items:center;gap:4px;background:var(--card);color:var(--brn);}
+.mode-btn i{font-size:19px;}
+.mode-btn.active{background:var(--brn);color:#fff;}
+.mode-btn:hover:not(.active){background:var(--card2);}
+.mode-sub{font-size:10px;font-weight:400;opacity:.8;}
+
+/* ══ UPLOAD ══ */
+.upload-zone{border:2px dashed #b0a898;border-radius:10px;padding:1.5rem 1rem;text-align:center;background:var(--card2);cursor:pointer;transition:all .15s;}
+.upload-zone:hover{border-color:var(--brn);background:#fdf6f0;}
+.upload-zone i{font-size:34px;color:var(--brn);display:block;margin-bottom:8px;}
+.upload-zone p{font-size:14px;color:var(--olive);font-weight:700;}
+.upload-zone span{font-size:12px;color:#999;}
+.file-list{margin-top:10px;}
+.file-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--bg2);border-radius:8px;margin-bottom:6px;border:.5px solid var(--bd);}
+.fi-ico{font-size:17px;color:var(--olive);}
+.fi-name{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.fi-size{font-size:11px;color:#999;flex-shrink:0;}
+.fi-del{background:none;border:none;color:var(--err);font-size:16px;padding:2px;display:flex;align-items:center;}
+
+/* ══ RECORD SUMMARY ══ */
+.rec-sum{background:var(--bg2);border:.5px solid var(--bd);border-radius:8px;padding:10px 14px;margin-bottom:12px;}
+.rec-sum table{width:100%;font-size:13px;border-collapse:collapse;}
+.rec-sum td{padding:3px 2px;vertical-align:top;}
+.rec-sum td:first-child{color:#777;width:95px;}
+.rec-sum td:last-child{font-weight:700;}
+
+/* ══ RESULT / ERROR ══ */
+.success-box{background:var(--green-bg);border:1px solid var(--green-bd);border-radius:10px;padding:1.25rem;text-align:center;margin-bottom:1rem;}
+.success-box i{font-size:40px;color:#3b6d11;display:block;margin-bottom:8px;}
+.success-box p{font-size:15px;font-weight:700;color:var(--green-txt);}
+.success-box span{font-size:13px;color:#5a8060;}
+.err-msg{color:var(--err);font-size:13px;padding:0 0 10px;display:flex;align-items:center;gap:6px;}
+.err-msg i{font-size:16px;flex-shrink:0;}
+.not-found{border:1px solid var(--warn-bd);border-radius:10px;background:var(--warn-bg);padding:12px 14px;margin-top:10px;font-size:13px;color:var(--warn-txt);display:flex;align-items:flex-start;gap:8px;}
+.not-found i{font-size:16px;flex-shrink:0;margin-top:1px;}
+.result-card{border:1px solid var(--local-bd);border-radius:10px;background:var(--green-bg);padding:12px 14px;margin-top:10px;}
+.rc-lbl{font-size:11px;color:#3b6d11;font-weight:700;margin-bottom:8px;display:flex;align-items:center;gap:5px;}
+.rc-row{display:flex;gap:10px;margin-bottom:6px;}
+.rc-row:last-child{margin-bottom:0;}
+.rc-fld{flex:1;}
+.rc-fl{font-size:11px;color:#5a8060;margin-bottom:2px;}
+.rc-fv{font-size:14px;font-weight:700;color:var(--green-txt);background:#fff;border:.5px solid var(--local-bd);border-radius:6px;padding:7px 10px;}
+
+/* ══ TABLE LIST ══ */
+.tbl-wrap{overflow-x:auto;}
+table.lst{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;}
+table.lst th{background:var(--bg);color:#5a4535;font-weight:700;padding:8px;text-align:left;border-bottom:1px solid var(--bd);white-space:nowrap;}
+table.lst td{padding:9px 8px;border-bottom:.5px solid var(--bd2);vertical-align:middle;word-break:break-all;}
+table.lst tr:last-child td{border-bottom:none;}
+table.lst tr.sel-row{background:#f2ebe3;}
+table.lst tr:not(.sel-row):hover{background:var(--bg2);cursor:pointer;}
+.chk-col{width:34px;text-align:center;}
+.chk{width:19px;height:19px;accent-color:var(--brn);cursor:pointer;}
+.sel-bar{background:var(--card2);border-top:1px solid var(--bd);padding:10px 14px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--brn);}
+.cnt-badge{font-size:11px;color:#c9b99a;background:rgba(255,255,255,0.15);padding:2px 8px;border-radius:10px;}
+.filter-bar{padding:10px 12px;border-bottom:.5px solid var(--bd2);display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.filter-btn{padding:4px 11px;border:.5px solid #c0b8ac;border-radius:14px;font-size:11px;background:var(--card);color:var(--txt2);font-weight:600;}
+.filter-btn.active{background:var(--brn);color:#fff;border-color:var(--brn);}
+
+/* ══ PREVIEW / BARCODE ══ */
+.preview-box{background:var(--card);border:1px solid var(--bd);box-shadow:0 1px 4px rgba(46,61,69,0.06);border-radius:10px;padding:1.25rem;margin-bottom:1rem;}
+.preview-lbl{font-size:12px;color:var(--olive);font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:5px;}
+.bc-area{background:#fff;border:1.5px solid var(--dk);border-radius:6px;padding:1.25rem;text-align:center;margin-bottom:12px;}
+.bc-no{font-size:11px;font-family:Arial,monospace;color:var(--dk);letter-spacing:1px;font-weight:700;margin-top:8px;word-break:break-all;}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;}
+.info-item{background:var(--bg2);border-radius:6px;padding:7px 10px;}
+.ii-l{font-size:10px;color:#777;margin-bottom:2px;}
+.ii-v{font-size:12px;font-weight:700;word-break:break-all;}
+.info-full{grid-column:1/-1;}
+
+/* ══ GROUP BOX ══ */
+.group-box{border:1px solid var(--bd);border-radius:10px;padding:12px;margin-bottom:12px;background:var(--card2);}
+.group-box:last-child{margin-bottom:0;}
+.group-lbl{font-size:12px;color:var(--brn);font-weight:700;margin-bottom:10px;display:flex;align-items:center;gap:5px;}
+.group-note{font-size:12px;color:var(--txt2);background:var(--bg2);border-radius:6px;padding:6px 10px;margin-bottom:10px;display:flex;align-items:flex-start;gap:5px;}
+.wo-row{display:flex;gap:8px;align-items:flex-end;}
+.wo-row input{flex:1;}
+
+/* ══ TAB BAR (for label query/list) ══ */
+.inner-tabs{display:flex;background:var(--dk);margin:-1rem -1rem 1rem;border-bottom:2px solid var(--olive);}
+.itab{flex:1;padding:0;border:none;background:transparent;}
+.itab-inner{display:flex;align-items:center;justify-content:center;gap:7px;padding:13px 8px;font-size:13px;font-weight:700;color:#7a9aaa;border-bottom:3px solid transparent;}
+.itab.active .itab-inner{color:var(--cream);border-bottom-color:var(--brn);background:var(--dk);}
+
+/* ══ SPIN ══ */
+@keyframes spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ░░░ LOGIN ░░░ -->
+<div id="s-login" class="s-login">
+  <div class="login-logo">
+    <div class="login-logo-icon"><i class="ti ti-scan"></i></div>
+    <div class="login-sysname">文件及影像掃描系統</div>
+  </div>
+  <div class="login-card">
+    <div class="login-hint">請輸入帳號與密碼</div>
+    <div class="lf">
+      <label><i class="ti ti-user"></i>帳號</label>
+      <input type="text" id="f-user" placeholder="請輸入帳號" autocomplete="username"
+        onkeydown="if(event.key==='Enter')getElementById('f-pass').focus()">
+    </div>
+    <div class="lf">
+      <label><i class="ti ti-lock"></i>密碼</label>
+      <div class="lf-wrap">
+        <input type="password" id="f-pass" placeholder="請輸入密碼" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter')doLogin()">
+        <button class="lf-eye" onclick="togglePwd()" type="button"><i class="ti ti-eye" id="eye-ico"></i></button>
+      </div>
+    </div>
+    <div id="login-err" class="login-err hidden"><i class="ti ti-alert-circle"></i>帳號或密碼錯誤，請重新輸入</div>
+    <button class="btn-login" id="btn-login" onclick="doLogin()">
+      <i class="ti ti-login"></i>登入
+    </button>
+  </div>
+  <div class="login-footer">© 文件及影像掃描系統<br>如有問題請聯絡 IT 服務台</div>
+</div>
+
+<!-- ░░░ HOME ░░░ -->
+<div id="s-home" class="s-home hidden">
+  <div class="home-topbar">
+    <div class="home-user">
+      <div class="home-avatar" id="h-avatar">U</div>
+      <div><div class="home-uname" id="h-uname">使用者</div><div class="home-urole">倉儲作業人員</div></div>
+    </div>
+    <button class="btn-logout" onclick="doLogout()"><i class="ti ti-logout" style="font-size:13px;"></i>登出</button>
+  </div>
+  <div class="home-body">
+    <div class="home-greet"><div class="home-greet-t">請選擇作業功能</div></div>
+    <button class="home-fn-btn fn-seal" onclick="goFunc('seal')">
+      <div class="home-fn-ico"><i class="ti ti-package-export"></i></div>
+      <div class="home-fn-name">封箱</div>
+      <div class="home-fn-desc">影像拍攝作業 · 文件歸檔標籤印製</div>
+    </button>
+    <button class="home-fn-btn fn-open" onclick="goFunc('open')">
+      <div class="home-fn-ico"><i class="ti ti-package-import"></i></div>
+      <div class="home-fn-name">拆箱</div>
+      <div class="home-fn-desc">進口貨 · 國內貨 · Shop Repair · 移倉調撥</div>
+    </button>
+    <button class="home-fn-btn fn-arch" onclick="goFunc('archive')">
+      <div class="home-fn-ico"><i class="ti ti-printer"></i></div>
+      <div class="home-fn-name">歸檔標籤製作</div>
+      <div class="home-fn-desc">報單 · 國內貨 · 進口貨 · Shop Repair · SDS · 移倉調撥</div>
+    </button>
+  </div>
+  <div class="home-foot">© 文件及影像掃描系統</div>
+</div>
+
+<!-- ░░░ HEADER (shared for all sub-screens) ░░░ -->
+<div class="hdr hidden" id="main-hdr">
+  <button class="hdr-back hidden" id="btn-back" onclick="navBack()"><i class="ti ti-arrow-left"></i></button>
+  <button class="hdr-title" id="hdr-title" onclick="goToHome()">文件及影像掃描系統</button>
+  <i class="ti ti-scan hdr-icon" id="hdr-icon"></i>
+</div>
+
+<!-- ░░░ MENU: 封箱 ░░░ -->
+<div id="s-seal" class="s-menu hidden">
+  <div class="menu-body">
+    <div class="menu-section">
+      <div class="msec-hd"><i class="ti ti-camera"></i>影像拍攝作業</div>
+      <div class="msec-body">
+        <button class="mitem" onclick="nav('seal-photo')">
+          <i class="ti ti-camera mico"></i><span class="mitem-txt">影像拍攝作業 — 外運</span>
+          <span class="mitem-badge badge-photo">拍攝</span><i class="ti ti-chevron-right mitem-arr"></i>
+        </button>
+      </div>
+    </div>
+    <div class="menu-section">
+      <div class="msec-hd"><i class="ti ti-printer"></i>文件歸檔標籤印製</div>
+      <div class="msec-body">
+        <button class="mitem" onclick="nav('seal-label')">
+          <i class="ti ti-printer mico"></i><span class="mitem-txt">文件歸檔標籤印製 — 外運</span>
+          <span class="mitem-badge badge-label">列印</span><i class="ti ti-chevron-right mitem-arr"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="menu-foot">© 文件及影像掃描系統</div>
+</div>
+
+<!-- ░░░ MENU: 拆箱 ░░░ -->
+<div id="s-open" class="s-menu hidden">
+  <div class="menu-body">
+    <div class="menu-section">
+      <div class="msec-hd"><i class="ti ti-camera"></i>影像拍攝作業</div>
+      <div class="msec-body">
+        <div class="grid2">
+          <button class="tile tile-photo" onclick="nav('open-photo-import')"><i class="ti ti-camera"></i><span class="tile-name">進口貨</span></button>
+          <button class="tile tile-photo" onclick="nav('open-photo-domestic')"><i class="ti ti-camera"></i><span class="tile-name">國內貨</span></button>
+          <button class="tile tile-photo" onclick="nav('open-photo-shoprepair')"><i class="ti ti-camera"></i><span class="tile-name">Shop Repair</span></button>
+          <button class="tile tile-photo" onclick="nav('open-photo-transfer')"><i class="ti ti-camera"></i><span class="tile-name">移倉調撥</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="menu-section">
+      <div class="msec-hd"><i class="ti ti-printer"></i>文件歸檔標籤印製</div>
+      <div class="msec-body">
+        <div class="grid3">
+          <button class="tile tile-label" onclick="nav('open-label-import')"><i class="ti ti-printer"></i><span class="tile-name">進口貨</span></button>
+          <button class="tile tile-label" onclick="nav('open-label-domestic')"><i class="ti ti-printer"></i><span class="tile-name">國內貨</span></button>
+          <button class="tile tile-label" onclick="nav('open-label-shoprepair')"><i class="ti ti-printer"></i><span class="tile-name">Shop Repair</span></button>
+          <button class="tile tile-label" onclick="nav('open-label-transfer')"><i class="ti ti-printer"></i><span class="tile-name">移倉調撥</span></button>
+          <button class="tile tile-label" onclick="nav('open-label-sds')"><i class="ti ti-printer"></i><span class="tile-name">SDS</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="menu-foot">© 文件及影像掃描系統</div>
+</div>
+
+<!-- ░░░ MENU: 歸檔標籤 ░░░ -->
+<div id="s-archive" class="s-menu hidden">
+  <div class="menu-body">
+    <div class="menu-section">
+      <div class="msec-hd"><i class="ti ti-printer"></i>請選擇標籤類別</div>
+      <div class="msec-body">
+        <div class="grid2">
+          <button class="tile tile-arch" onclick="nav('arch-decl')"><i class="ti ti-file-invoice"></i><span class="tile-name">報單</span></button>
+          <button class="tile tile-arch" onclick="nav('arch-domestic')"><i class="ti ti-home"></i><span class="tile-name">國內貨</span></button>
+          <button class="tile tile-arch" onclick="nav('arch-import')"><i class="ti ti-plane-arrival"></i><span class="tile-name">進口貨</span></button>
+          <button class="tile tile-arch" onclick="nav('arch-shoprepair')"><i class="ti ti-tool"></i><span class="tile-name">Shop Repair</span></button>
+          <button class="tile tile-arch" onclick="nav('arch-sds')"><i class="ti ti-file-certificate"></i><span class="tile-name">SDS</span></button>
+          <button class="tile tile-arch" onclick="nav('arch-transfer')"><i class="ti ti-arrows-exchange"></i><span class="tile-name">移倉調撥</span></button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="menu-foot">© 文件及影像掃描系統</div>
+</div>
+
+<!-- ░░░ SUB SCREEN (dynamic content) ░░░ -->
+<div id="s-sub" class="s-sub hidden">
+  <div class="stepbar" id="stepbar"></div>
+  <div class="sub-body" id="sub-body"></div>
+</div>
+
+</div><!-- .app -->
+<script>
+// ══════════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════════
+var USERS={'admin':'1234','warehouse':'abcd','operator':'pass1'};
+var today=new Date().toISOString().slice(0,10);
+var SEAL_REC=[
+  {date:'2025-05-01',invoice:'INV-2025-0501',line:'L01',pn:'PN-A1001',sn:'SN-00123',note:'外箱完整，無破損'},
+  {date:'2025-05-01',invoice:'INV-2025-0501',line:'L02',pn:'PN-A1002',sn:'SN-00124',note:''},
+  {date:'2025-05-02',invoice:'INV-2025-0502',line:'L01',pn:'PN-B2010',sn:'',note:'需冷藏保存，注意溫度控制'},
+  {date:'2025-05-02',invoice:'INV-2025-0502',line:'L02',pn:'PN-B2011',sn:'SN-00301',note:''},
+  {date:'2025-05-03',invoice:'INV-2025-0503',line:'L01',pn:'PN-C3050',sn:'SN-00450',note:'易碎品，請輕拿輕放'}
+];
+var CUSTOMS=[
+  {decl:'D-2025-00101',mswb:'MSWB-TW-8801',hawb:'HAWB-001-A'},
+  {decl:'D-2025-00102',mswb:'MSWB-TW-8801',hawb:'HAWB-001-B'},
+  {decl:'D-2025-00103',mswb:'MSWB-TW-8802',hawb:'HAWB-002-A'},
+  {decl:'D-2025-00201',mswb:'MSWB-TW-9001',hawb:'HAWB-003-A'},
+  {decl:'D-2025-00202',mswb:'MSWB-TW-9001',hawb:'HAWB-003-B'},
+  {decl:'D-2025-00203',mswb:'MSWB-TW-9002',hawb:'HAWB-004-A'}
+];
+var PO_IMP={
+  'PO-IMP-001':{items:['001','002','003'],pns:{'001':['CPN-A001','SPN-A001'],'002':['CPN-A002'],'003':['CPN-A003']}},
+  'PO-IMP-002':{items:['001','002'],pns:{'001':['CPN-B001','SPN-B001'],'002':['CPN-B010']}},
+  'PO-IMP-003':{items:['001'],pns:{'001':['CPN-C001']}}
+};
+var PO_DOM={
+  'PO-DOM-001':{items:['001','002'],pns:{'001':['PN-DOM-A001','PN-DOM-A002'],'002':['PN-DOM-A010']}},
+  'PO-DOM-002':{items:['001'],pns:{'001':['PN-DOM-B001']}}
+};
+var WO_DB={
+  'WO-2025-BO-001':{pn:'PN-BO-A001',sn:'SN-BO-10001'},
+  'WO-2025-BT-001':{pn:'PN-BT-B010',sn:'SN-BT-20101'},
+  'WO-2025-WB-001':{pn:'PN-WB-C005',sn:'SN-WB-30050'},
+  'WO-2025-PIME-001':{pn:'PN-PIME-D100',sn:'SN-PIME-40100'}
+};
+var TO_DB={
+  'TO-2025-0001':{items:{'TX-001':{pn:'PN-TR-A001',label:'TX-001 — 零件 A'},'TX-002':{pn:'PN-TR-A002',label:'TX-002 — 零件 B'}}},
+  'TO-2025-0002':{items:{'TX-001':{pn:'PN-TR-B001',label:'TX-001 — 電池組'},'TX-002':{pn:'PN-TR-B002',label:'TX-002 — 控制板'}}},
+  'TO-IMP-0001':{items:{'TX-001':{pn:'CPN-IMP-D001',label:'TX-001 — 進口件 D1'},'TX-002':{pn:'CPN-IMP-D002',label:'TX-002 — 進口件 D2'}}}
+};
+var IMP_REC=[
+  {date:'2025-05-01',decl:'D-2025-00101',mswb:'MSWB-TW-8801',hawb:'HAWB-001-A',po:'PO-IMP-001',item:'001',pn:'CPN-A001'},
+  {date:'2025-05-01',decl:'D-2025-00101',mswb:'MSWB-TW-8801',hawb:'HAWB-001-A',po:'PO-IMP-001',item:'002',pn:'CPN-A002'},
+  {date:'2025-05-02',decl:'D-2025-00103',mswb:'MSWB-TW-8802',hawb:'HAWB-002-A',po:'PO-IMP-002',item:'001',pn:'CPN-B001'},
+  {date:'2025-05-03',decl:'D-2025-00201',mswb:'MSWB-TW-9001',hawb:'HAWB-003-A',po:'PO-IMP-003',item:'001',pn:'CPN-C001'},
+  {date:'2025-05-04',decl:'D-2025-00202',mswb:'MSWB-TW-9001',hawb:'HAWB-003-B',po:'PO-IMP-002',item:'002',pn:'CPN-B010'}
+];
+
+// ══════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════
+function el(id){return document.getElementById(id);}
+function val(id){return(el(id)||{value:''}).value;}
+function show(id){var e=el(id);if(e)e.classList.remove('hidden');}
+function hide(id){var e=el(id);if(e)e.classList.add('hidden');}
+function showErr(eid,mid,msg){show(eid);el(mid).textContent=msg;}
+function hideErr(id){hide(id);}
+function fmtSz(n){return n<1024?n+'B':n<1048576?Math.round(n/1024)+'KB':(n/1048576).toFixed(1)+'MB';}
+function setOpts(sid,opts,ph){var s=el(sid);if(!s)return;s.innerHTML='<option value="">'+ph+'</option>';opts.forEach(function(o){s.innerHTML+='<option value="'+o+'">'+o+'</option>';});}
+
+function renderBarcode(svgId,noId,v){
+  var svg=el(svgId);if(!svg)return;
+  var pat=[];for(var i=0;i<v.length;i++){var c=v.charCodeAt(i);pat.push((c%3)+2,(c%5)+1,(c%4)+1,(c%2)+1);}
+  var tot=pat.reduce(function(a,b){return a+b;},0),x=10,u=240/tot,bars='';
+  for(var j=0;j<pat.length;j++){var w=pat[j]*u;if(j%2===0)bars+='<rect x="'+x.toFixed(2)+'" y="4" width="'+Math.max(w-.8,.8).toFixed(2)+'" height="52" fill="#2e3d45"/>';x+=w;}
+  svg.innerHTML=bars;
+  el(noId).textContent=v.replace(/\|/g,' | ');
+}
+
+function renderFiles(listId,files,rmFn){
+  var l=el(listId);if(!l)return;
+  l.innerHTML=files.map(function(f,i){
+    var ico=f.type==='application/pdf'?'ti-file-type-pdf':'ti-photo';
+    return '<div class="file-item"><i class="ti '+ico+' fi-ico"></i><span class="fi-name">'+f.name+'</span><span class="fi-size">'+fmtSz(f.size)+'</span><button class="fi-del" onclick="'+rmFn+'('+i+')"><i class="ti ti-x"></i></button></div>';
+  }).join('');
+}
+
+function infoGrid(items){
+  return items.map(function(it){
+    return '<div class="info-item'+(it.full?' info-full':'')+'"><div class="ii-l">'+it.l+'</div><div class="ii-v">'+it.v+'</div></div>';
+  }).join('');
+}
+
+function noteCount(taId,cntId,max){
+  var ta=el(taId);if(!ta)return;
+  var txt=ta.value,cjk=(txt.match(/[\u4e00-\u9fff\u3400-\u4dbf\uff00-\uffef]/g)||[]).length;
+  var nc=txt.replace(/[\u4e00-\u9fff\u3400-\u4dbf\uff00-\uffef]/g,'').length;
+  var tot=cjk+Math.ceil(nc/2);
+  if(tot>max){var r='',cnt=0;for(var i=0;i<txt.length;i++){var c=txt[i],cjkc=/[\u4e00-\u9fff]/.test(c);cnt+=cjkc?1:.5;if(cnt>max)break;r+=c;}ta.value=r;tot=max;}
+  var ce=el(cntId);if(!ce)return;
+  ce.textContent=tot+' / '+max+' 字';ce.className='char-count'+(tot>=max?' char-over':'');
+}
+
+// ══════════════════════════════════════════════
+// AUTH
+// ══════════════════════════════════════════════
+var CUR_USER=null;
+
+function togglePwd(){
+  var p=el('f-pass'),i=el('eye-ico');if(!p)return;
+  p.type=p.type==='password'?'text':'password';
+  i.className=p.type==='password'?'ti ti-eye':'ti ti-eye-off';
+}
+
+function doLogin(){
+  var u=val('f-user').trim(),p=val('f-pass');
+  var b=el('btn-login'),e=el('login-err');
+  if(!u||!p){show('login-err');e.innerHTML='<i class="ti ti-alert-circle"></i>請輸入帳號與密碼';return;}
+  b.innerHTML='<i class="ti ti-loader-2" style="animation:spin 1s linear infinite;font-size:20px;"></i> 登入中...';
+  b.disabled=true;hide('login-err');
+  setTimeout(function(){
+    if(USERS[u]!==undefined&&USERS[u]===p){
+      CUR_USER={name:u,ini:u.charAt(0).toUpperCase()};
+      el('h-avatar').textContent=CUR_USER.ini;el('h-uname').textContent=CUR_USER.name;
+      hide('s-login');show('s-home');el('s-home').style.display='flex';
+    } else {
+      show('login-err');e.innerHTML='<i class="ti ti-alert-circle"></i>帳號或密碼錯誤，請重新輸入';
+      b.innerHTML='<i class="ti ti-login"></i>登入';b.disabled=false;
+      el('f-pass').value='';el('f-pass').focus();
+    }
+  },800);
+}
+
+function doLogout(){
+  CUR_USER=null;
+  ['s-home','s-seal','s-open','s-archive','s-sub'].forEach(hide);
+  hide('main-hdr');
+  var b=el('btn-login');
+  b.innerHTML='<i class="ti ti-login"></i>登入';b.disabled=false;
+  el('f-user').value='';el('f-pass').value='';
+  var i=el('eye-ico');if(i)i.className='ti ti-eye';
+  var p=el('f-pass');if(p)p.type='password';
+  hide('login-err');
+  show('s-login');
+}
+
+// ══════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════
+var CUR='home'; // current screen key
+var PARENT={}; // parent screen for each screen key
+
+function allScreens(){return['s-login','s-home','s-seal','s-open','s-archive','s-sub'];}
+
+function showOnly(id){
+  allScreens().forEach(hide);
+  show(id);
+  if(id==='s-home'){hide('main-hdr');}
+  else{show('main-hdr');}
+}
+
+function setHdr(title,icon,showBack){
+  el('hdr-title').textContent=title||'文件及影像掃描系統';
+  el('hdr-icon').className='ti '+(icon||'ti-scan')+' hdr-icon';
+  if(showBack){show('btn-back');}else{hide('btn-back');}
+}
+
+function setSteps(steps,active){
+  var sb=el('stepbar');
+  sb.innerHTML=steps.map(function(s,i){
+    var cls=i+1===active?'active':i+1<active?'done':'';
+    return '<div class="step '+cls+'"><i class="ti '+s.icon+'"></i>'+s.label+'</div>';
+  }).join('');
+}
+
+function goStep(n){
+  var divs=el('stepbar').querySelectorAll('.step');
+  divs.forEach(function(d,i){d.className='step'+(i+1===n?' active':i+1<n?' done':'');});
+}
+
+function goToHome(){
+  CUR='home';
+  showOnly('s-home');
+  el('s-home').style.display='flex';
+}
+
+function goFunc(fn){
+  hide('s-home');show('main-hdr');
+  if(fn==='seal'){
+    CUR='seal';PARENT['seal']='home';
+    setHdr('封箱','ti-package-export',true);
+    showOnly('s-seal');show('main-hdr');
+  } else if(fn==='open'){
+    CUR='open';PARENT['open']='home';
+    setHdr('拆箱','ti-package-import',true);
+    showOnly('s-open');show('main-hdr');
+  } else if(fn==='archive'){
+    CUR='archive';PARENT['archive']='home';
+    setHdr('歸檔標籤製作','ti-printer',true);
+    showOnly('s-archive');show('main-hdr');
+  }
+}
+
+function nav(screen){
+  var prev=CUR;
+  CUR=screen;
+  PARENT[screen]=prev;
+  showOnly('s-sub');show('main-hdr');show('btn-back');
+  el('sub-body').innerHTML='';
+  el('stepbar').innerHTML='';
+  renderScreen(screen);
+}
+
+function navBack(){
+  var p=PARENT[CUR]||'home';
+  CUR=p;
+  if(p==='home'){goToHome();}
+  else if(p==='seal'){setHdr('封箱','ti-package-export',true);showOnly('s-seal');show('main-hdr');}
+  else if(p==='open'){setHdr('拆箱','ti-package-import',true);showOnly('s-open');show('main-hdr');}
+  else if(p==='archive'){setHdr('歸檔標籤製作','ti-printer',true);showOnly('s-archive');show('main-hdr');}
+  else{nav(p);}
+}
+
+// ══════════════════════════════════════════════
+// SCREEN ROUTER
+// ══════════════════════════════════════════════
+function renderScreen(s){
+  if(s==='seal-photo')      renderSealPhoto();
+  else if(s==='seal-label') renderSealLabel();
+  else if(s==='open-photo-import')   renderPhotoImport();
+  else if(s==='open-photo-domestic') renderPhotoDomestic();
+  else if(s==='open-photo-shoprepair') renderPhotoShopRepair();
+  else if(s==='open-photo-transfer') renderPhotoTransfer();
+  else if(s==='open-label-import')   renderLabelImport();
+  else if(s==='arch-decl') renderArchDecl();
+  else if(s==='arch-import') renderArchImport();
+  else renderStub(s);
+}
+
+function renderStub(s){
+  setHdr(s,'ti-tools',true);
+  setSteps([{icon:'ti-list-check',label:'作業中'},{icon:'ti-check',label:'完成'}],1);
+  el('sub-body').innerHTML='<div style="padding:2.5rem 1rem;text-align:center;"><i class="ti ti-tools" style="font-size:44px;color:var(--olive);display:block;margin-bottom:1rem;"></i><div style="font-size:16px;font-weight:700;color:var(--dk);margin-bottom:6px;">此功能開發中</div><div style="font-size:13px;color:#999;">敬請期待</div></div>';
+}
+
+// ══════════════════════════════════════════════
+// 1. 封箱 — 影像拍攝 — 外運
+// ══════════════════════════════════════════════
+var SP={files:[]};
+function renderSealPhoto(){
+  setHdr('影像拍攝作業 — 外運','ti-camera',true);
+  setSteps([{icon:'ti-forms',label:'資料輸入'},{icon:'ti-upload',label:'影像上傳'},{icon:'ti-check',label:'完成'}],1);
+  el('sub-body').innerHTML=spHTML1();
+  el('f-date').value=today;
+  el('f-note').addEventListener('input',function(){noteCount('f-note','nc',100);});
+}
+function spHTML1(){
+  return '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-forms"></i>基本資料輸入</div></div><div class="card-bd">'+
+    '<div class="field"><label>拍攝日<span class="req">*</span></label><input type="date" id="f-date"></div>'+
+    '<div class="field"><label>Invoice NO<span class="req">*</span></label><input type="text" id="f-invoice" placeholder="請輸入 Invoice 號碼"></div>'+
+    '<div class="row2"><div class="field"><label>Line<span class="req">*</span></label><input type="text" id="f-line" placeholder="例：L01"></div><div class="field"><label>PN<span class="req">*</span></label><input type="text" id="f-pn" placeholder="零件編號"></div></div>'+
+    '<div class="field"><label>SN</label><input type="text" id="f-sn" placeholder="序號（選填）"></div>'+
+    '<div class="field"><label>Note</label><textarea id="f-note" rows="4" placeholder="備註（最多100個中文字）"></textarea><div class="char-count" id="nc">0 / 100 字</div></div>'+
+    '</div></div>'+
+    '<div id="sp-err" class="err-msg hidden"><i class="ti ti-alert-circle"></i><span id="sp-err-m"></span></div>'+
+    '<button class="btn-p" onclick="spSubmit()"><i class="ti ti-check"></i>確認新增，前往影像上傳</button>';
+}
+window.spSubmit=function(){
+  var d=val('f-date'),inv=val('f-invoice').trim(),ln=val('f-line').trim(),pn=val('f-pn').trim();
+  if(!d||!inv||!ln||!pn){showErr('sp-err','sp-err-m','請填寫所有必填欄位');return;}
+  hideErr('sp-err');
+  SP.data={date:d,invoice:inv,line:ln,pn:pn,sn:val('f-sn').trim(),note:val('f-note').trim()};
+  SP.files=[];goStep(2);
+  el('sub-body').innerHTML=uploadHTML('sp','spAddF','spRmF',SP.data,'sp-up-err','sp-up-err-m','spUpload','renderSealPhoto');
+  el('sp-file-input').addEventListener('change',function(){spAddF(this.files);this.value='';});
+};
+window.spAddF=function(nf){addFiles(nf,SP.files,'sp-file-list','spRmF','sp-up-err','sp-up-err-m');};
+window.spRmF=function(i){SP.files.splice(i,1);renderFiles('sp-file-list',SP.files,'spRmF');};
+window.spUpload=function(){
+  if(!SP.files.length){showErr('sp-up-err','sp-up-err-m','請至少上傳一個檔案');return;}
+  goStep(3);
+  el('sub-body').innerHTML=doneHTML(SP.files.length,'renderSealPhoto','seal-label');
+};
+
+// ══════════════════════════════════════════════
+// 2. 封箱 — 標籤印製 — 外運
+// ══════════════════════════════════════════════
+var SL={sel:[],tab:'query',qr:[]};
+function renderSealLabel(){
+  setHdr('文件歸檔標籤印製 — 外運','ti-printer',true);
+  setSteps([{icon:'ti-list-check',label:'選擇項目'},{icon:'ti-plane-departure',label:'AWB'},{icon:'ti-barcode',label:'預覽'},{icon:'ti-check',label:'完成'}],1);
+  SL.sel=[];
+  el('sub-body').innerHTML=
+    '<div class="inner-tabs">'+
+      '<button class="itab active" id="sl-tq" onclick="slTab(\'query\')"><div class="itab-inner"><i class="ti ti-search" style="font-size:16px;"></i>查詢</div></button>'+
+      '<button class="itab" id="sl-tl" onclick="slTab(\'list\')"><div class="itab-inner"><i class="ti ti-list-check" style="font-size:16px;"></i>外運待列印清單</div></button>'+
+    '</div>'+
+    '<div id="sl-q-panel"></div>'+
+    '<div id="sl-l-panel" class="hidden"></div>';
+  slTab('query');
+}
+window.slTab=function(t){
+  SL.tab=t;
+  ['query','list'].forEach(function(x){
+    var on=x===t;
+    el('sl-t'+(x==='query'?'q':'l')).classList.toggle('active',on);
+  });
+  if(t==='query'){
+    show('sl-q-panel');hide('sl-l-panel');
+    el('sl-q-panel').innerHTML=slQueryHTML();
+    el('f-sldate').value=today;
+  } else {
+    hide('sl-q-panel');show('sl-l-panel');
+    el('sl-l-panel').innerHTML=slListHTML();
+    slRenderTable();
+  }
+};
+function slQueryHTML(){
+  return '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-search"></i>查詢條件</div></div><div class="card-bd">'+
+    '<div class="field"><label>拍攝日</label><input type="date" id="f-sldate"></div>'+
+    '<div class="field"><label>Invoice NO</label><input type="text" id="f-slinv" placeholder="Invoice 號碼"></div>'+
+    '<div class="row2"><div class="field"><label>Line</label><input type="text" id="f-slln" placeholder="例：L01"></div><div class="field"><label>PN</label><input type="text" id="f-slpn" placeholder="零件編號"></div></div>'+
+    '<div class="field"><label>SN</label><input type="text" id="f-slsn" placeholder="序號"></div>'+
+    '</div></div>'+
+    '<button class="btn-p" onclick="slQuery()" style="margin-bottom:10px;"><i class="ti ti-search"></i>查詢</button>'+
+    '<button class="btn-s" style="margin-top:0;" onclick="slClear()"><i class="ti ti-refresh"></i>清除條件</button>'+
+    '<div id="sl-qr" style="margin-top:14px;"></div>';
+}
+window.slQuery=function(){
+  var d=val('f-sldate'),inv=val('f-slinv').trim().toLowerCase(),
+      ln=val('f-slln').trim().toLowerCase(),pn=val('f-slpn').trim().toLowerCase(),
+      sn=val('f-slsn').trim().toLowerCase();
+  var res=SEAL_REC.filter(function(r){
+    if(d&&r.date!==d)return false;
+    if(inv&&r.invoice.toLowerCase().indexOf(inv)<0)return false;
+    if(ln&&r.line.toLowerCase().indexOf(ln)<0)return false;
+    if(pn&&r.pn.toLowerCase().indexOf(pn)<0)return false;
+    if(sn&&r.sn.toLowerCase().indexOf(sn)<0)return false;
+    return true;
+  });
+  var qr=el('sl-qr');
+  if(!res.length){qr.innerHTML='<div class="not-found"><i class="ti ti-search-off"></i>查無符合條件的記錄</div>';return;}
+  var rows=res.map(function(r){return'<tr><td>'+r.date+'</td><td style="font-size:11px">'+r.invoice+'</td><td>'+r.line+'</td><td style="font-size:11px">'+r.pn+'</td><td style="font-size:11px">'+(r.sn||'—')+'</td></tr>';}).join('');
+  qr.innerHTML='<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-table"></i>查詢結果</div><span class="cnt-badge">共 '+res.length+' 筆</span></div><div class="tbl-wrap"><table class="lst"><thead><tr><th style="width:78px">拍攝日</th><th style="width:110px">Invoice NO</th><th style="width:50px">Line</th><th style="width:90px">PN</th><th style="width:90px">SN</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+};
+window.slClear=function(){
+  ['f-sldate','f-slinv','f-slln','f-slpn','f-slsn'].forEach(function(id){var e=el(id);if(e)e.value='';});
+  if(el('f-sldate'))el('f-sldate').value=today;
+  var q=el('sl-qr');if(q)q.innerHTML='';
+};
+function slListHTML(){
+  return '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-list-check"></i>外運待列印清單</div><span class="cnt-badge" id="sl-sel-hd">已選 0 筆</span></div>'+
+    '<div class="tbl-wrap"><table class="lst"><thead><tr><th class="chk-col"><input type="checkbox" class="chk" id="sl-chk-all" onchange="slToggleAll(this)"></th><th style="width:78px">拍攝日</th><th style="width:110px">Invoice</th><th style="width:50px">Line</th><th style="width:90px">PN</th><th style="width:90px">SN</th></tr></thead><tbody id="sl-tbody"></tbody></table></div>'+
+    '<div class="sel-bar"><span id="sl-sel-info">請勾選需要列印標籤的項目</span></div></div>'+
+    '<div id="sl-err" class="err-msg hidden"><i class="ti ti-alert-circle"></i><span id="sl-err-m"></span></div>'+
+    '<button class="btn-p" onclick="slGoAWB()"><i class="ti ti-arrow-right"></i>確認選取，輸入 AWB</button>';
+}
+function slRenderTable(){
+  var tb=el('sl-tbody');if(!tb)return;
+  tb.innerHTML=SEAL_REC.map(function(r,i){
+    var chk=SL.sel.indexOf(i)>=0;
+    return '<tr class="'+(chk?'sel-row':'')+'" onclick="slToggle('+i+')" id="sl-row-'+i+'">'+
+      '<td class="chk-col" onclick="event.stopPropagation()"><input type="checkbox" class="chk" id="sl-c-'+i+'" '+(chk?'checked':'')+' onchange="slToggle('+i+')"></td>'+
+      '<td>'+r.date+'</td><td style="font-size:11px">'+r.invoice+'</td><td>'+r.line+'</td><td style="font-size:11px">'+r.pn+'</td><td style="font-size:11px">'+(r.sn||'—')+'</td>'+
+    '</tr>';
+  }).join('');
+  slUpdateUI();
+}
+window.slToggle=function(i){var idx=SL.sel.indexOf(i);if(idx>=0)SL.sel.splice(idx,1);else SL.sel.push(i);var c=el('sl-c-'+i),r=el('sl-row-'+i);if(c)c.checked=SL.sel.indexOf(i)>=0;if(r)r.className=SL.sel.indexOf(i)>=0?'sel-row':'';slUpdateUI();};
+window.slToggleAll=function(cb){SL.sel=cb.checked?SEAL_REC.map(function(_,i){return i;}).slice():[];SEAL_REC.forEach(function(_,i){var c=el('sl-c-'+i),r=el('sl-row-'+i);if(c)c.checked=cb.checked;if(r)r.className=cb.checked?'sel-row':'';});slUpdateUI();};
+function slUpdateUI(){var n=SL.sel.length;if(el('sl-sel-hd'))el('sl-sel-hd').textContent='已選 '+n+' 筆';if(el('sl-sel-info'))el('sl-sel-info').textContent=n?'已選取 '+n+' 筆':'請勾選需要列印標籤的項目';var ca=el('sl-chk-all');if(ca){ca.checked=n===SEAL_REC.length&&n>0;ca.indeterminate=n>0&&n<SEAL_REC.length;}}
+window.slGoAWB=function(){
+  if(!SL.sel.length){showErr('sl-err','sl-err-m','請至少選取一筆');return;}
+  hideErr('sl-err');goStep(2);
+  el('sub-body').innerHTML='<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-plane-departure"></i>AWB 資料輸入</div></div><div class="card-bd"><div class="field" style="margin-bottom:0"><label>AWB No.<span class="req">*</span></label><input type="text" id="f-awb" placeholder="例：176-12345678"><div class="hint">航空提單號碼</div></div></div></div>'+
+    '<div id="sl-awb-err" class="err-msg hidden"><i class="ti ti-alert-circle"></i><span id="sl-awb-err-m"></span></div>'+
+    '<button class="btn-p" onclick="slGoPreview()"><i class="ti ti-barcode"></i>建立條碼並預覽</button>'+
+    '<button class="btn-s" onclick="renderSealLabel()"><i class="ti ti-arrow-left"></i>返回</button>';
+};
+window.slGoPreview=function(){
+  var awb=val('f-awb').trim();if(!awb){showErr('sl-awb-err','sl-awb-err-m','請填寫 AWB No.');return;}
+  var rows=SL.sel.map(function(i){return SEAL_REC[i];});
+  var invs=[...new Set(rows.map(function(r){return r.invoice;}))];
+  var bv='AWB:'+awb.replace(/-/g,'')+'|INV:'+invs.join('+');
+  SL.bv=bv;goStep(3);
+  el('sub-body').innerHTML='<div class="preview-box"><div class="preview-lbl"><i class="ti ti-eye" style="font-size:13px;"></i>條碼預覽 — 請確認後執行列印</div>'+
+    '<div class="bc-area"><svg id="sl-bc" width="260" height="70" viewBox="0 0 260 70" xmlns="http://www.w3.org/2000/svg"></svg><div class="bc-no" id="sl-bc-n"></div></div>'+
+    '<div class="info-grid" id="sl-ig"></div></div>'+
+    '<button class="btn-p" onclick="slPrint()"><i class="ti ti-printer"></i>確認無誤，執行列印</button>'+
+    '<button class="btn-s" onclick="slGoAWB()"><i class="ti ti-arrow-left"></i>返回修改 AWB</button>';
+  setTimeout(function(){
+    renderBarcode('sl-bc','sl-bc-n',bv);
+    el('sl-ig').innerHTML=infoGrid([
+      {l:'AWB No.',v:awb,full:true},
+      {l:'選取筆數',v:SL.sel.length+'筆'},
+      {l:'Invoice',v:invs.join(', '),full:true},
+      {l:'Line',v:rows.map(function(r){return r.line;}).join(', ')},
+      {l:'PN',v:rows.map(function(r){return r.pn;}).join(', ')}
+    ]);
+  },50);
+};
+window.slPrint=function(){
+  goStep(4);var bv=SL.bv;
+  el('sub-body').innerHTML='<div class="success-box"><i class="ti ti-circle-check"></i><p>列印指令已送出！</p><span>共 '+SL.sel.length+' 筆，條碼已傳送至印表機</span></div>'+
+    '<div class="preview-box"><div class="preview-lbl">本次條碼內容</div><div class="bc-area"><svg id="sl-done-bc" width="260" height="70" viewBox="0 0 260 70" xmlns="http://www.w3.org/2000/svg"></svg><div class="bc-no" id="sl-done-n"></div></div></div>'+
+    '<button class="btn-p" onclick="renderSealLabel()"><i class="ti ti-refresh"></i>返回清單繼續列印</button>'+
+    '<button class="btn-s" onclick="goToHome()"><i class="ti ti-home"></i>返回首頁</button>';
+  setTimeout(function(){renderBarcode('sl-done-bc','sl-done-n',bv);},50);
+};
+
+// ══════════════════════════════════════════════
+// 3. 拆箱 — 影像拍攝 — 進口貨
+// ══════════════════════════════════════════════
+var PI={files:[]};
+function renderPhotoImport(){
+  setHdr('影像拍攝作業 — 進口貨','ti-camera',true);
+  setSteps([{icon:'ti-forms',label:'資料輸入'},{icon:'ti-upload',label:'影像上傳'},{icon:'ti-check',label:'完成'}],1);
+  PI.files=[];
+  var declOpts=[...new Set(CUSTOMS.map(function(r){return r.decl;}))];
+  var mswbOpts=[...new Set(CUSTOMS.map(function(r){return r.mswb;}))];
+  var hawbOpts=[...new Set(CUSTOMS.map(function(r){return r.hawb;}))];
+  var poOpts=Object.keys(PO_IMP);
+  var mkOpts=function(arr){return arr.map(function(v){return'<option value="'+v+'">'+v+'</option>';}).join('');};
+  el('sub-body').innerHTML=
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-calendar"></i>到貨日</div></div><div class="card-bd"><div class="field" style="margin-bottom:0"><input type="date" id="f-arrive"></div></div></div>'+
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-file-invoice"></i>報關資訊（三選一帶出其餘）</div></div><div class="card-bd">'+
+      '<div class="group-note"><i class="ti ti-info-circle"></i>選擇任一欄位，系統自動帶出其餘兩個</div>'+
+      '<div class="group-box"><div class="group-lbl"><i class="ti ti-file-description"></i>報單號碼</div><div class="field" style="margin-bottom:0"><select id="f-decl" onchange="piSync(\'decl\')"><option value="">— 請選擇報單號碼 —</option>'+mkOpts(declOpts)+'</select></div></div>'+
+      '<div class="group-box"><div class="group-lbl"><i class="ti ti-building-warehouse"></i>MSWB 主提單</div><div class="field" style="margin-bottom:0"><select id="f-mswb" onchange="piSync(\'mswb\')"><option value="">— 請選擇 MSWB —</option>'+mkOpts(mswbOpts)+'</select></div></div>'+
+      '<div class="group-box" style="margin-bottom:0"><div class="group-lbl"><i class="ti ti-plane-arrival"></i>HAWB 分提單</div><div class="field" style="margin-bottom:0"><select id="f-hawb" onchange="piSync(\'hawb\')"><option value="">— 請選擇 HAWB —</option>'+mkOpts(hawbOpts)+'</select></div></div>'+
+    '</div></div>'+
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-shopping-cart"></i>採購資訊（連動下拉）</div></div><div class="card-bd">'+
+      '<div class="field"><label>採購單號<span class="req">*</span></label><select id="f-po" onchange="piItems()"><option value="">— 請選擇採購單號 —</option>'+mkOpts(poOpts)+'</select></div>'+
+      '<div class="row2"><div class="field"><label>項次<span class="req">*</span></label><select id="f-item" onchange="piPNs()"><option value="">— 請先選採購單 —</option></select></div>'+
+      '<div class="field"><label>報關/系統件號<span class="req">*</span></label><select id="f-pn"><option value="">— 請先選項次 —</option></select></div></div>'+
+    '</div></div>'+
+    '<div id="pi-err" class="err-msg hidden"><i class="ti ti-alert-circle"></i><span id="pi-err-m"></span></div>'+
+    '<button class="btn-p" onclick="piSubmit()"><i class="ti ti-check"></i>確認新增，前往影像上傳</button>';
+  el('f-arrive').value=today;
+}
+window.piSync=function(src){
+  var d=val('f-decl'),m=val('f-mswb'),h=val('f-hawb'),found=null;
+  if(src==='decl'&&d)found=CUSTOMS.find(function(r){return r.decl===d;});
+  else if(src==='hawb'&&h)found=CUSTOMS.find(function(r){return r.hawb===h;});
+  else if(src==='mswb'&&m){
+    var ms=CUSTOMS.filter(function(r){return r.mswb===m;});
+    if(ms.length===1)found=ms[0];
+    else if(ms.length>1){
+      var hs=el('f-hawb');hs.innerHTML='<option value="">— 請選擇 HAWB —</option>';
+      ms.forEach(function(r){hs.innerHTML+='<option value="'+r.hawb+'">'+r.hawb+'</option>';});
+      el('f-decl').value='';return;
+    }
+  }
+  if(found){
+    el('f-decl').value=found.decl;el('f-mswb').value=found.mswb;el('f-hawb').value=found.hawb;
+    ['decl','mswb','hawb'].forEach(function(k){
+      var e=el('f-'+k);
+      e.style.background=k===src?'':'var(--local-bg)';e.style.borderColor=k===src?'':'var(--local-bd)';e.style.color=k===src?'':'var(--local-txt)';
+    });
+  }
+};
+window.piItems=function(){var po=val('f-po');setOpts('f-item',po&&PO_IMP[po]?PO_IMP[po].items:[],po?'— 請選擇項次 —':'— 請先選採購單 —');setOpts('f-pn',[],'— 請先選項次 —');};
+window.piPNs=function(){var po=val('f-po'),it=val('f-item');var pns=po&&it&&PO_IMP[po]&&PO_IMP[po].pns[it]?PO_IMP[po].pns[it]:[];setOpts('f-pn',pns,pns.length?'— 請選擇件號 —':'— 請先選項次 —');};
+window.piSubmit=function(){
+  var ar=val('f-arrive'),d=val('f-decl'),m=val('f-mswb'),h=val('f-hawb'),po=val('f-po'),it=val('f-item'),pn=val('f-pn');
+  if(!ar){showErr('pi-err','pi-err-m','請填寫到貨日');return;}
+  if(!d||!m||!h){showErr('pi-err','pi-err-m','請選擇報關資訊任一欄位');return;}
+  if(!po||!it||!pn){showErr('pi-err','pi-err-m','請選擇採購單號、項次及件號');return;}
+  hideErr('pi-err');
+  PI.data={arrive:ar,decl:d,mswb:m,hawb:h,po:po,item:it,pn:pn};
+  PI.files=[];goStep(2);
+  el('sub-body').innerHTML=uploadHTML('pi','piAddF','piRmF',PI.data,'pi-up-err','pi-up-err-m','piUpload','renderPhotoImport');
+  el('pi-file-input').addEventListener('change',function(){piAddF(this.files);this.value='';});
+};
+window.piAddF=function(nf){addFiles(nf,PI.files,'pi-file-list','piRmF','pi-up-err','pi-up-err-m');};
+window.piRmF=function(i){PI.files.splice(i,1);renderFiles('pi-file-list',PI.files,'piRmF');};
+window.piUpload=function(){
+  if(!PI.files.length){showErr('pi-up-err','pi-up-err-m','請至少上傳一個檔案');return;}
+  goStep(3);el('sub-body').innerHTML=doneHTML(PI.files.length,'renderPhotoImport','open-label-import');
+};
+
+// ══════════════════════════════════════════════
+// 4. 拆箱 — 影像拍攝 — 國內貨
+// ══════════════════════════════════════════════
+var PD={files:[]};
+function renderPhotoDomestic(){
+  setHdr('影像拍攝作業 — 國內貨','ti-camera',true);
+  setSteps([{icon:'ti-forms',label:'資料輸入'},{icon:'ti-upload',label:'影像上傳'},{icon:'ti-check',label:'完成'}],1);
+  PD.files=[];
+  var poOpts=Object.keys(PO_DOM);
+  el('sub-body').innerHTML=
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-lock"></i>固定欄位</div></div><div class="card-bd">'+
+      '<div class="field field-local"><label>報單號碼 <span class="tag-local">LOCAL</span></label><input type="text" value="LOCAL" readonly tabindex="-1"></div>'+
+      '<div class="row2"><div class="field field-local"><label>MSWB 主提單 <span class="tag-local">LOCAL</span></label><input type="text" value="LOCAL" readonly tabindex="-1"></div>'+
+      '<div class="field field-local"><label>HAWB 分提單 <span class="tag-local">LOCAL</span></label><input type="text" value="LOCAL" readonly tabindex="-1"></div></div>'+
+    '</div></div>'+
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-forms"></i>採購資訊</div></div><div class="card-bd">'+
+      '<div class="field"><label>採購單號<span class="req">*</span></label><select id="f-po" onchange="pdItems()"><option value="">— 請選擇採購單號 —</option>'+poOpts.map(function(k){return'<option value="'+k+'">'+k+'</option>';}).join('')+'</select></div>'+
+      '<div class="row2"><div class="field"><label>項次<span class="req">*</span></label><select id="f-item" onchange="pdPNs()"><option value="">— 請先選採購單 —</option></select></div>'+
+      '<div class="field"><label>系統件號<span class="req">*</span></label><select id="f-pn"><option value="">— 請先選項次 —</option></select></div></div>'+
+    '</div></div>'+
+    '<div id="pd-err" class="err-msg hidden"><i class="ti ti-alert-circle"></i><span id="pd-err-m"></span></div>'+
+    '<button class="btn-p" onclick="pdSubmit()"><i class="ti ti-check"></i>確認新增，前往影像上傳</button>';
+}
+window.pdItems=function(){var po=val('f-po');setOpts('f-item',po&&PO_DOM[po]?PO_DOM[po].items:[],po?'— 請選擇項次 —':'— 請先選採購單 —');setOpts('f-pn',[],'— 請先選項次 —');};
+window.pdPNs=function(){var po=val('f-po'),it=val('f-item');var pns=po&&it&&PO_DOM[po]&&PO_DOM[po].pns[it]?PO_DOM[po].pns[it]:[];setOpts('f-pn',pns,pns.length?'— 請選擇件號 —':'— 請先選項次 —');};
+window.pdSubmit=function(){
+  var po=val('f-po'),it=val('f-item'),pn=val('f-pn');
+  if(!po||!it||!pn){showErr('pd-err','pd-err-m','請選擇採購單號、項次及系統件號');return;}
+  hideErr('pd-err');PD.data={po:po,item:it,pn:pn};PD.files=[];goStep(2);
+  el('sub-body').innerHTML=uploadHTML('pd','pdAddF','pdRmF',PD.data,'pd-up-err','pd-up-err-m','pdUpload','renderPhotoDomestic');
+  el('pd-file-input').addEventListener('change',function(){pdAddF(this.files);this.value='';});
+};
+window.pdAddF=function(nf){addFiles(nf,PD.files,'pd-file-list','pdRmF','pd-up-err','pd-up-err-m');};
+window.pdRmF=function(i){PD.files.splice(i,1);renderFiles('pd-file-list',PD.files,'pdRmF');};
+window.pdUpload=function(){
+  if(!PD.files.length){showErr('pd-up-err','pd-up-err-m','請至少上傳一個檔案');return;}
+  goStep(3);el('sub-body').innerHTML=doneHTML(PD.files.length,'renderPhotoDomestic','open-label-domestic');
+};
+
+// ══════════════════════════════════════════════
+// 5. 拆箱 — 影像拍攝 — Shop Repair
+// ══════════════════════════════════════════════
+var PSR={files:[],shop:null,lookupOK:false};
+function renderPhotoShopRepair(){
+  setHdr('影像拍攝作業 — Shop Repair','ti-camera',true);
+  setSteps([{icon:'ti-forms',label:'資料輸入'},{icon:'ti-upload',label:'影像上傳'},{icon:'ti-check',label:'完成'}],1);
+  PSR.files=[];PSR.shop=null;PSR.lookupOK=false;
+  el('sub-body').innerHTML=
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-tool"></i>SHOP 選擇</div></div><div class="card-bd"><label class="field" style="margin-bottom:8px"><span style="font-size:12px;color:#5a4535;font-weight:700;">SHOP<span class="req">*</span></span></label>'+
+      '<div class="shop-grid">'+
+        '<button type="button" class="shop-btn" id="sb-BO" onclick="psrShop(\'BO\')"><span class="shop-code">BO</span><span class="shop-name">氣瓶</span></button>'+
+        '<button type="button" class="shop-btn" id="sb-BT" onclick="psrShop(\'BT\')"><span class="shop-code">BT</span><span class="shop-name">電池</span></button>'+
+        '<button type="button" class="shop-btn" id="sb-WB" onclick="psrShop(\'WB\')"><span class="shop-code">WB</span><span class="shop-name">輪煞</span></button>'+
+        '<button type="button" class="shop-btn" id="sb-PIME" onclick="psrShop(\'PIME\')"><span class="shop-code">PIME</span><span class="shop-name">精密量具儀器工具</span></button>'+
+      '</div></div></div>'+
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-package-search"></i>Package ID / WO 查詢</div></div><div class="card-bd">'+
+      '<div class="field"><label>Package ID / WO<span class="req">*</span></label><div class="wo-row"><input type="text" id="f-wo" placeholder="請輸入編號" oninput="psrClear()"><button type="button" class="btn-lk" onclick="psrLookup()"><i class="ti ti-search"></i>查詢</button></div><div class="hint">輸入後按「查詢」自動帶出 PN 與 SN</div></div>'+
+      '<div id="psr-lr"></div>'+
+    '</div></div>'+
+    '<div id="psr-err" class="err-msg hidden"><i class="ti ti-alert-circle"></i><span id="psr-err-m"></span></div>'+
+    '<button class="btn-p" onclick="psrSubmit()"><i class="ti ti-check"></i>確認新增，前往影像上傳</button>';
+}
+window.psrShop=function(c){PSR.shop=c;['BO','BT','WB','PIME'].forEach(function(x){var b=el('sb-'+x);if(b)b.classList.toggle('selected',x===c);});};
+window.psrClear=function(){PSR.lookupOK=false;var r=el('psr-lr');if(r)r.innerHTML='';};
+window.psrLookup=function(){
+  var wo=val('f-wo').trim(),r=el('psr-lr');
+  if(!wo){r.innerHTML='<div class="not-found"><i class="ti ti-alert-triangle"></i>請輸入 Package ID / WO 後再查詢</div>';return;}
+  var f=WO_DB[wo];
+  if(f){PSR.lookupOK=true;r.innerHTML='<div class="result-card"><div class="rc-lbl"><i class="ti ti-circle-check"></i>查詢成功</div><div class="rc-row"><div class="rc-fld"><div class="rc-fl">PN</div><div class="rc-fv">'+f.pn+'</div></div><div class="rc-fld"><div class="rc-fl">SN</div><div class="rc-fv">'+(f.sn||'— 無 SN —')+'</div></div></div></div>';}
+  else{PSR.lookupOK=true;r.innerHTML='<div class="not-found"><i class="ti ti-alert-triangle"></i>查無此編號：<strong>'+wo+'</strong>，請手動輸入</div><div class="row2" style="margin-top:10px"><div class="field"><label>PN（手動）</label><input type="text" id="f-pn-m" placeholder="請輸入 PN"></div><div class="field"><label>SN（手動）</label><input type="text" id="f-sn-m" placeholder="請輸入 SN"></div></div>';}
+};
+window.psrSubmit=function(){
+  if(!PSR.shop){showErr('psr-err','psr-err-m','請選擇 SHOP 類別');return;}
+  var wo=val('f-wo').trim();if(!wo){showErr('psr-err','psr-err-m','請輸入 Package ID / WO 並執行查詢');return;}
+  if(!PSR.lookupOK){showErr('psr-err','psr-err-m','請先按「查詢」確認編號');return;}
+  var f=WO_DB[wo];var pn=f?f.pn:(val('f-pn-m')||'').trim();var sn=f?f.sn:(val('f-sn-m')||'').trim();
+  if(!pn){showErr('psr-err','psr-err-m','請確認 PN 資料');return;}
+  hideErr('psr-err');
+  var snames={BO:'氣瓶',BT:'電池',WB:'輪煞',PIME:'精密量具儀器工具'};
+  PSR.data={shop:PSR.shop+' — '+snames[PSR.shop],wo:wo,pn:pn,sn:sn||'—'};
+  PSR.files=[];goStep(2);
+  el('sub-body').innerHTML=uploadHTML('psr','psrAddF','psrRmF',PSR.data,'psr-up-err','psr-up-err-m','psrUpload','renderPhotoShopRepair');
+  el('psr-file-input').addEventListener('change',function(){psrAddF(this.files);this.value='';});
+};
+window.psrAddF=function(nf){addFiles(nf,PSR.files,'psr-file-list','psrRmF','psr-up-err','psr-up-err-m');};
+window.psrRmF=function(i){PSR.files.splice(i,1);renderFiles('psr-file-list',PSR.files,'psrRmF');};
+window.psrUpload=function(){
+  if(!PSR.files.length){showErr('psr-up-err','psr-up-err-m','請至少上傳一個檔案');return;}
+  goStep(3);el('sub-body').innerHTML=doneHTML(PSR.files.length,'renderPhotoShopRepair','open-label-shoprepair');
+};
+
+// ══════════════════════════════════════════════
+// 6. 拆箱 — 影像拍攝 — 移倉調撥
+// ══════════════════════════════════════════════
+var PT={files:[],mode:'domestic',lookupOK:false,pn:''};
+function renderPhotoTransfer(){
+  setHdr('影像拍攝作業 — 移倉調撥','ti-camera',true);
+  setSteps([{icon:'ti-forms',label:'資料輸入'},{icon:'ti-upload',label:'影像上傳'},{icon:'ti-check',label:'完成'}],1);
+  PT.files=[];PT.mode='domestic';PT.lookupOK=false;PT.pn='';
+  el('sub-body').innerHTML=
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-arrows-exchange"></i>移倉調撥類型</div></div><div class="card-bd">'+
+      '<div class="mode-toggle"><button type="button" class="mode-btn active" id="pt-m-dom" onclick="ptMode(\'domestic\')"><i class="ti ti-home"></i>國內 — 移倉調撥<span class="mode-sub">固定 LOCAL</span></button>'+
+      '<button type="button" class="mode-btn" id="pt-m-imp" onclick="ptMode(\'import\')"><i class="ti ti-plane-arrival"></i>進口 — 移倉調撥<span class="mode-sub">輸入報關資訊</span></button></div>'+
+    '</div></div>'+
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-file-invoice"></i>報關資訊</div></div><div class="card-bd" id="pt-customs-bd">'+ptCustomsHTML('domestic')+'</div></div>'+
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-list-numbers"></i>調撥單資訊</div></div><div class="card-bd">'+
+      '<div class="field"><label>To 單號<span class="req">*</span></label><div class="wo-row"><input type="text" id="f-to" placeholder="請輸入 To 單號" oninput="ptClear()"><button type="button" class="btn-lk" onclick="ptLookup()"><i class="ti ti-search"></i>查詢</button></div></div>'+
+      '<div id="pt-tx-sec" class="hidden"><div class="field"><label>TX 項次<span class="req">*</span></label><select id="f-tx" onchange="ptPN()"><option value="">— 請選擇 TX 項次 —</option></select></div><div id="pt-pn-r"></div></div>'+
+      '<div id="pt-lk-msg"></div>'+
+    '</div></div>'+
+    '<div id="pt-err" class="err-msg hidden"><i class="ti ti-alert-circle"></i><span id="pt-err-m"></span></div>'+
+    '<button class="btn-p" onclick="ptSubmit()"><i class="ti ti-check"></i>確認新增，前往影像上傳</button>';
+}
+function ptCustomsHTML(m){
+  if(m==='domestic')return '<div class="field field-blank"><label>到貨日 <span class="tag-blank">留白</span></label><input type="text" value="" readonly tabindex="-1" placeholder="國內移倉不填寫"></div><div class="field field-local"><label>報單號碼 <span class="tag-local">LOCAL</span></label><input type="text" value="LOCAL" readonly tabindex="-1"></div><div class="row2"><div class="field field-local"><label>MAWB 主提單 <span class="tag-local">LOCAL</span></label><input type="text" value="LOCAL" readonly tabindex="-1"></div><div class="field field-local"><label>HAWB 分提單 <span class="tag-local">LOCAL</span></label><input type="text" value="LOCAL" readonly tabindex="-1"></div></div>';
+  return '<div class="field"><label>到貨日 <span class="tag-req">必填</span></label><input type="date" id="f-arrive" value="'+today+'"></div><div class="field"><label>報單號碼 <span class="tag-req">必填</span></label><input type="text" id="f-decl" placeholder="請輸入報單號碼"></div><div class="row2"><div class="field"><label>MAWB 主提單 <span class="tag-req">必填</span></label><input type="text" id="f-mawb" placeholder="MAWB"></div><div class="field"><label>HAWB 分提單 <span class="tag-req">必填</span></label><input type="text" id="f-hawb" placeholder="HAWB"></div></div>';
+}
+window.ptMode=function(m){PT.mode=m;el('pt-m-dom').classList.toggle('active',m==='domestic');el('pt-m-imp').classList.toggle('active',m==='import');el('pt-customs-bd').innerHTML=ptCustomsHTML(m);ptClear();if(el('f-to'))el('f-to').value='';};
+window.ptClear=function(){PT.lookupOK=false;PT.pn='';hide('pt-tx-sec');var m=el('pt-lk-msg');if(m)m.innerHTML='';var p=el('pt-pn-r');if(p)p.innerHTML='';setOpts('f-tx',[],'— 請選擇 TX 項次 —');};
+window.ptLookup=function(){
+  var to=val('f-to').trim(),msg=el('pt-lk-msg');
+  if(!to){msg.innerHTML='<div class="not-found"><i class="ti ti-alert-triangle"></i>請輸入 To 單號後再查詢</div>';hide('pt-tx-sec');return;}
+  msg.innerHTML='';var f=TO_DB[to];
+  if(f){var txSel=el('f-tx');txSel.innerHTML='<option value="">— 請選擇 TX 項次 —</option>';Object.keys(f.items).forEach(function(k){txSel.innerHTML+='<option value="'+k+'">'+f.items[k].label+'</option>';});show('pt-tx-sec');var p=el('pt-pn-r');if(p)p.innerHTML='';PT.pn='';PT.lookupOK=false;}
+  else{hide('pt-tx-sec');msg.innerHTML='<div class="not-found"><i class="ti ti-alert-triangle"></i>查無 To 單號：<strong>'+to+'</strong></div>';}
+};
+window.ptPN=function(){var to=val('f-to').trim(),tx=val('f-tx'),pr=el('pt-pn-r');if(!tx){if(pr)pr.innerHTML='';PT.pn='';PT.lookupOK=false;return;}var rec=TO_DB[to]&&TO_DB[to].items[tx];if(rec){PT.pn=rec.pn;PT.lookupOK=true;pr.innerHTML='<div class="result-card"><div class="rc-lbl"><i class="ti ti-circle-check"></i>已帶出報關/系統件號</div><div style="font-size:14px;font-weight:700;color:var(--green-txt);background:#fff;border:.5px solid var(--local-bd);border-radius:6px;padding:8px 12px;">'+rec.pn+'</div></div>';}};
+window.ptSubmit=function(){
+  var isDom=PT.mode==='domestic';
+  if(!isDom){var ar=val('f-arrive'),dc=val('f-decl').trim(),ma=val('f-mawb').trim(),ha=val('f-hawb').trim();if(!ar||!dc||!ma||!ha){showErr('pt-err','pt-err-m','進口移倉需填寫到貨日、報單、MAWB、HAWB');return;}}
+  var to=val('f-to').trim();if(!to){showErr('pt-err','pt-err-m','請輸入 To 單號並執行查詢');return;}
+  if(!PT.lookupOK||!PT.pn){showErr('pt-err','pt-err-m','請選擇 TX 項次以帶出件號');return;}
+  hideErr('pt-err');
+  PT.data={mode:isDom?'國內 — 移倉調撥':'進口 — 移倉調撥',arrive:isDom?'（留白）':val('f-arrive'),decl:isDom?'LOCAL':val('f-decl').trim(),mawb:isDom?'LOCAL':val('f-mawb').trim(),hawb:isDom?'LOCAL':val('f-hawb').trim(),to:to,tx:val('f-tx'),pn:PT.pn};
+  PT.files=[];goStep(2);
+  el('sub-body').innerHTML=uploadHTML('pt','ptAddF','ptRmF',PT.data,'pt-up-err','pt-up-err-m','ptUpload','renderPhotoTransfer');
+  el('pt-file-input').addEventListener('change',function(){ptAddF(this.files);this.value='';});
+};
+window.ptAddF=function(nf){addFiles(nf,PT.files,'pt-file-list','ptRmF','pt-up-err','pt-up-err-m');};
+window.ptRmF=function(i){PT.files.splice(i,1);renderFiles('pt-file-list',PT.files,'ptRmF');};
+window.ptUpload=function(){if(!PT.files.length){showErr('pt-up-err','pt-up-err-m','請至少上傳一個檔案');return;}goStep(3);el('sub-body').innerHTML=doneHTML(PT.files.length,'renderPhotoTransfer','open-label-transfer');};
+
+// ══════════════════════════════════════════════
+// 7. 拆箱 — 標籤印製 — 進口貨
+// ══════════════════════════════════════════════
+var LI={sel:[],filter:'ALL',bv:''};
+function renderLabelImport(){
+  setHdr('文件歸檔標籤印製 — 進口貨','ti-printer',true);
+  setSteps([{icon:'ti-list-check',label:'選擇項目'},{icon:'ti-barcode',label:'預覽確認'},{icon:'ti-check',label:'完成'}],1);
+  LI.sel=[];LI.filter='ALL';
+  el('sub-body').innerHTML=liHTML();
+  liInitFilters();liRenderTable();
+}
+function liHTML(){
+  return '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-list-check"></i>進口貨拍攝記錄清單</div><span class="cnt-badge" id="li-sel-hd">已選 0 筆</span></div>'+
+    '<div class="filter-bar" id="li-filter-bar"></div>'+
+    '<div class="tbl-wrap"><table class="lst"><thead><tr><th class="chk-col"><input type="checkbox" class="chk" id="li-ca" onchange="liToggleAll(this)"></th><th style="width:70px">到貨日</th><th style="width:84px">報單號碼</th><th style="width:76px">HAWB</th><th style="width:78px">採購單號</th><th style="width:34px">項次</th><th>件號</th></tr></thead><tbody id="li-tbody"></tbody></table></div>'+
+    '<div class="sel-bar"><span id="li-sel-info">請勾選需要列印標籤的項目</span></div></div>'+
+    '<div id="li-err" class="err-msg hidden"><i class="ti ti-alert-circle"></i><span id="li-err-m"></span></div>'+
+    '<button class="btn-p" onclick="liGoPreview()"><i class="ti ti-barcode"></i>確認選取，建立條碼並預覽</button>';
+}
+function liInitFilters(){
+  var bar=el('li-filter-bar');if(!bar)return;
+  bar.innerHTML='<span style="font-size:11px;color:#777;align-self:center;">篩選報單：</span>';
+  var decls=['ALL',...new Set(IMP_REC.map(function(r){return r.decl;}))];
+  decls.forEach(function(d){
+    var btn=document.createElement('button');
+    btn.className='filter-btn'+(d==='ALL'?' active':'');
+    btn.textContent=d==='ALL'?'全部':d;
+    btn.onclick=function(){LI.filter=d;bar.querySelectorAll('.filter-btn').forEach(function(b){b.classList.toggle('active',b.textContent===(d==='ALL'?'全部':d));});liRenderTable();};
+    bar.appendChild(btn);
+  });
+}
+function liVisible(){return IMP_REC.map(function(r,i){return{r:r,i:i};}).filter(function(x){return LI.filter==='ALL'||x.r.decl===LI.filter;});}
+function liRenderTable(){
+  var tb=el('li-tbody');if(!tb)return;
+  tb.innerHTML=liVisible().map(function(x){
+    var i=x.i,r=x.r,chk=LI.sel.indexOf(i)>=0;
+    return '<tr class="'+(chk?'sel-row':'')+'" onclick="liToggle('+i+')" id="li-r-'+i+'"><td class="chk-col" onclick="event.stopPropagation()"><input type="checkbox" class="chk" id="li-c-'+i+'" '+(chk?'checked':'')+' onchange="liToggle('+i+')"></td><td>'+r.date+'</td><td style="font-size:11px">'+r.decl+'</td><td style="font-size:11px">'+r.hawb+'</td><td style="font-size:11px">'+r.po+'</td><td style="text-align:center">'+r.item+'</td><td style="font-size:11px">'+r.pn+'</td></tr>';
+  }).join('');
+  liUpdateUI();
+}
+window.liToggle=function(i){var idx=LI.sel.indexOf(i);if(idx>=0)LI.sel.splice(idx,1);else LI.sel.push(i);var c=el('li-c-'+i),r=el('li-r-'+i);if(c)c.checked=LI.sel.indexOf(i)>=0;if(r)r.className=LI.sel.indexOf(i)>=0?'sel-row':'';liUpdateUI();};
+window.liToggleAll=function(cb){var vis=liVisible().map(function(x){return x.i;});if(cb.checked){vis.forEach(function(i){if(LI.sel.indexOf(i)<0)LI.sel.push(i);});}else{LI.sel=LI.sel.filter(function(i){return vis.indexOf(i)<0;});}vis.forEach(function(i){var c=el('li-c-'+i),r=el('li-r-'+i);if(c)c.checked=cb.checked;if(r)r.className=cb.checked?'sel-row':'';});liUpdateUI();};
+function liUpdateUI(){var n=LI.sel.length;if(el('li-sel-hd'))el('li-sel-hd').textContent='已選 '+n+' 筆';if(el('li-sel-info'))el('li-sel-info').textContent=n?'已選取 '+n+' 筆':'請勾選需要列印標籤的項目';var vis=liVisible().map(function(x){return x.i;});var sv=vis.filter(function(i){return LI.sel.indexOf(i)>=0;});var ca=el('li-ca');if(ca){ca.checked=vis.length>0&&sv.length===vis.length;ca.indeterminate=sv.length>0&&sv.length<vis.length;}}
+window.liGoPreview=function(){
+  if(!LI.sel.length){showErr('li-err','li-err-m','請至少選取一筆');return;}hideErr('li-err');
+  var rows=LI.sel.map(function(i){return IMP_REC[i];});
+  var decls=[...new Set(rows.map(function(r){return r.decl;}))];
+  var hawbs=[...new Set(rows.map(function(r){return r.hawb;}))];
+  var pos=[...new Set(rows.map(function(r){return r.po;}))];
+  var bv='DECL:'+decls.join('+').replace(/[^A-Z0-9]/gi,'')+'|HAWB:'+hawbs.join('+').replace(/[^A-Z0-9]/gi,'')+'|PO:'+pos.join('+').replace(/[^A-Z0-9]/gi,'');
+  LI.bv=bv;goStep(2);
+  el('sub-body').innerHTML='<div class="preview-box"><div class="preview-lbl"><i class="ti ti-eye" style="font-size:13px;"></i>條碼預覽 — 請確認後執行列印</div>'+
+    '<div class="bc-area"><svg id="li-bc" width="260" height="70" viewBox="0 0 260 70" xmlns="http://www.w3.org/2000/svg"></svg><div class="bc-no" id="li-bc-n"></div></div>'+
+    '<div class="info-grid" id="li-ig"></div></div>'+
+    '<button class="btn-p" onclick="liPrint()"><i class="ti ti-printer"></i>確認無誤，執行列印</button>'+
+    '<button class="btn-s" onclick="renderLabelImport()"><i class="ti ti-arrow-left"></i>返回修改選取</button>';
+  setTimeout(function(){
+    renderBarcode('li-bc','li-bc-n',bv);
+    el('li-ig').innerHTML=infoGrid([
+      {l:'到貨日',v:[...new Set(rows.map(function(r){return r.date;}))].join('、')},
+      {l:'報單號碼',v:decls.join('、')},
+      {l:'MSWB',v:[...new Set(rows.map(function(r){return r.mswb;}))].join('、')},
+      {l:'HAWB',v:hawbs.join('、')},
+      {l:'採購單號',v:pos.join('、')},
+      {l:'選取筆數',v:LI.sel.length+'筆'},
+      {l:'件號',v:[...new Set(rows.map(function(r){return r.pn;}))].join('、'),full:true}
+    ]);
+  },50);
+};
+window.liPrint=function(){
+  goStep(3);var bv=LI.bv;
+  el('sub-body').innerHTML='<div class="success-box"><i class="ti ti-circle-check"></i><p>列印指令已送出！</p><span>共 '+LI.sel.length+' 筆，條碼已傳送至印表機</span></div>'+
+    '<div class="preview-box"><div class="preview-lbl">本次條碼內容</div><div class="bc-area"><svg id="li-done-bc" width="260" height="70" viewBox="0 0 260 70" xmlns="http://www.w3.org/2000/svg"></svg><div class="bc-no" id="li-done-n"></div></div></div>'+
+    '<button class="btn-p" onclick="renderLabelImport()"><i class="ti ti-refresh"></i>返回清單繼續列印</button>'+
+    '<button class="btn-s" onclick="goToHome()"><i class="ti ti-home"></i>返回首頁</button>';
+  setTimeout(function(){renderBarcode('li-done-bc','li-done-n',bv);},50);
+};
+
+
+// ══════════════════════════════════════════════
+// 歸檔標籤製作 — 報單
+// ══════════════════════════════════════════════
+var AD = {};
+
+function renderArchDecl() {
+  setHdr('歸檔標籤製作 — 報單', 'ti-file-invoice', true);
+  setSteps([{icon:'ti-forms',label:'資料輸入'},{icon:'ti-barcode',label:'預覽確認'},{icon:'ti-check',label:'完成'}], 1);
+  AD = {};
+  setTimeout(function(){var e=document.getElementById('f-ad-arrival');if(e)e.value=today;},50);
+  var uDecls=[...new Set(CUSTOMS.map(function(r){return r.decl;}))];
+  var uMswbs=[...new Set(CUSTOMS.map(function(r){return r.mswb;}))];
+  var uHawbs=[...new Set(CUSTOMS.map(function(r){return r.hawb;}))];
+  function mkOpts(arr){return arr.map(function(v){return '<option value="'+v+'">'+v+'</option>';}).join('');}
+  el('sub-body').innerHTML=
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-calendar"></i>到貨日期</div></div><div class="card-bd">'+
+      '<div class="field" style="margin-bottom:0"><label>到貨日期<span class="req">*</span></label><input type="date" id="f-ad-arrival"></div>'+
+    '</div></div>'+
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-file-invoice"></i>報關資訊（三選一帶出其餘）</div></div><div class="card-bd">'+
+      '<div class="group-note"><i class="ti ti-info-circle"></i>選擇任一欄位，系統自動帶出其餘兩個</div>'+
+      '<div class="group-box"><div class="group-lbl"><i class="ti ti-file-description"></i>報單號碼</div><div class="field" style="margin-bottom:0"><select id="f-ad-decl" onchange="adSync(&quot;decl&quot;)"><option value="">— 請選擇報單號碼 —</option>'+mkOpts(uDecls)+'</select></div></div>'+
+      '<div class="group-box"><div class="group-lbl"><i class="ti ti-building-warehouse"></i>MAWB 主提單</div><div class="field" style="margin-bottom:0"><select id="f-ad-mawb" onchange="adSync(&quot;mawb&quot;)"><option value="">— 請選擇 MAWB 主提單 —</option>'+mkOpts(uMswbs)+'</select></div></div>'+
+      '<div class="group-box" style="margin-bottom:0"><div class="group-lbl"><i class="ti ti-plane-arrival"></i>HAWB 分提單</div><div class="field" style="margin-bottom:0"><select id="f-ad-hawb" onchange="adSync(&quot;hawb&quot;)"><option value="">— 請選擇 HAWB 分提單 —</option>'+mkOpts(uHawbs)+'</select></div></div>'+
+    '</div></div>'+
+    '<div id="ad-err" class="err-msg hidden"><i class="ti ti-alert-circle"></i><span id="ad-err-m"></span></div>'+
+    '<button class="btn-p" onclick="adSubmit()"><i class="ti ti-barcode"></i>建立條碼並預覽</button>';
+}
+
+window.adSync=function(src){
+  var d=val('f-ad-decl'),m=val('f-ad-mawb'),h=val('f-ad-hawb'),found=null;
+  if(src==='decl'&&d)found=CUSTOMS.find(function(r){return r.decl===d;});
+  else if(src==='hawb'&&h)found=CUSTOMS.find(function(r){return r.hawb===h;});
+  else if(src==='mawb'&&m){
+    var ms=CUSTOMS.filter(function(r){return r.mswb===m;});
+    if(ms.length===1){found=ms[0];}
+    else if(ms.length>1){
+      var hs=el('f-ad-hawb');hs.innerHTML='<option value="">— 請選擇 HAWB 分提單 —</option>';
+      ms.forEach(function(r){hs.innerHTML+='<option value="'+r.hawb+'">'+r.hawb+'</option>';});
+      el('f-ad-decl').value='';
+      ['decl','mawb','hawb'].forEach(function(k){var e=el('f-ad-'+k);if(e){e.style.background='';e.style.borderColor='';e.style.color='';}});
+      return;
+    }
+  }
+  if(found){
+    el('f-ad-decl').value=found.decl;el('f-ad-mawb').value=found.mswb;el('f-ad-hawb').value=found.hawb;
+    ['decl','mawb','hawb'].forEach(function(k){
+      var e=el('f-ad-'+k);if(!e)return;
+      e.style.background=k===src?'':'var(--local-bg)';e.style.borderColor=k===src?'':'var(--local-bd)';e.style.color=k===src?'':'var(--local-txt)';
+    });
+  }
+};
+
+window.adSubmit=function(){
+  var arrival=val('f-ad-arrival').trim(),d=val('f-ad-decl'),m=val('f-ad-mawb'),h=val('f-ad-hawb');
+  if(!arrival){showErr('ad-err','ad-err-m','請填寫到貨日期');return;}
+  if(!d||!m||!h){showErr('ad-err','ad-err-m','請選擇報單號碼、MAWB 或 HAWB 中任一欄位');return;}
+  hideErr('ad-err');AD={arrival:arrival,decl:d,mawb:m,hawb:h};
+  var bv='DATE:'+arrival.replace(/-/g,'')+'|DECL:'+d.replace(/[^A-Z0-9]/gi,'')+'|HAWB:'+h.replace(/[^A-Z0-9]/gi,'');
+  AD.bv=bv;goStep(2);
+  el('sub-body').innerHTML=
+    '<div class="preview-box"><div class="preview-lbl"><i class="ti ti-eye" style="font-size:13px;"></i>條碼預覽 — 請確認內容後執行列印</div>'+
+      '<div class="bc-area"><svg id="ad-bc" width="260" height="70" viewBox="0 0 260 70" xmlns="http://www.w3.org/2000/svg"></svg><div class="bc-no" id="ad-bc-n"></div></div>'+
+      '<div class="info-grid" id="ad-ig"></div>'+
+    '</div>'+
+    '<button class="btn-p" onclick="adPrint()"><i class="ti ti-printer"></i>確認無誤，執行列印</button>'+
+    '<button class="btn-s" onclick="renderArchDecl()"><i class="ti ti-arrow-left"></i>返回修改資料</button>';
+  setTimeout(function(){
+    renderBarcode('ad-bc','ad-bc-n',bv);
+    el('ad-ig').innerHTML=infoGrid([{l:'到貨日期',v:arrival,full:true},{l:'報單號碼',v:d,full:true},{l:'MAWB 主提單',v:m},{l:'HAWB 分提單',v:h}]);
+  },50);
+};
+
+window.adPrint=function(){
+  goStep(3);var bv=AD.bv;
+  el('sub-body').innerHTML=
+    '<div class="success-box"><i class="ti ti-circle-check"></i><p>列印指令已送出！</p><span>條碼標籤已傳送至印表機</span></div>'+
+    '<div class="preview-box"><div class="preview-lbl">本次列印條碼內容</div>'+
+      '<div class="bc-area"><svg id="ad-done-bc" width="260" height="70" viewBox="0 0 260 70" xmlns="http://www.w3.org/2000/svg"></svg><div class="bc-no" id="ad-done-n"></div></div>'+
+      '<div class="info-grid" style="margin-top:10px;">'+infoGrid([{l:'到貨日期',v:AD.arrival,full:true},{l:'報單號碼',v:AD.decl,full:true},{l:'MAWB 主提單',v:AD.mawb},{l:'HAWB 分提單',v:AD.hawb}])+'</div>'+
+    '</div>'+
+    '<button class="btn-p" onclick="renderArchDecl()"><i class="ti ti-refresh"></i>繼續製作下一張</button>'+
+    '<button class="btn-s" onclick="navBack()"><i class="ti ti-arrow-left"></i>返回歸檔標籤選單</button>';
+  setTimeout(function(){renderBarcode('ad-done-bc','ad-done-n',bv);},50);
+};
+
+
+// ══════════════════════════════════════════════
+// 歸檔標籤製作 — 進口貨
+// ══════════════════════════════════════════════
+var AI_DATA = {
+  'PO-IMP-001':{
+    items:{
+      '001':{pns:['CPN-A001','SPN-A001'],lots:{
+        'CPN-A001':[
+          {commitDate:'2025-04-01',trxNo:'TRX-001',recvNo:'RCV-A001',sn:'SN-A001',grn:'GRN-A001'},
+          {commitDate:'2025-04-02',trxNo:'TRX-002',recvNo:'RCV-A002',sn:'SN-A002',grn:'GRN-A002'}
+        ],
+        'SPN-A001':[
+          {commitDate:'2025-04-05',trxNo:'TRX-003',recvNo:'RCV-A003',sn:'SN-A003',grn:'GRN-A003'}
+        ]
+      }},
+      '002':{pns:['CPN-A002'],lots:{
+        'CPN-A002':[
+          {commitDate:'2025-04-10',trxNo:'TRX-010',recvNo:'RCV-B001',sn:'SN-B001',grn:'GRN-B001'}
+        ]
+      }}
+    }
+  },
+  'PO-IMP-002':{
+    items:{
+      '001':{pns:['CPN-B001'],lots:{
+        'CPN-B001':[
+          {commitDate:'2025-04-15',trxNo:'TRX-020',recvNo:'RCV-C001',sn:'SN-C001',grn:'GRN-C001'},
+          {commitDate:'2025-04-16',trxNo:'TRX-021',recvNo:'RCV-C002',sn:'SN-C002',grn:'GRN-C002'}
+        ]
+      }},
+      '002':{pns:['CPN-B002','SPN-B002'],lots:{
+        'CPN-B002':[{commitDate:'2025-04-20',trxNo:'TRX-030',recvNo:'RCV-D001',sn:'SN-D001',grn:'GRN-D001'}],
+        'SPN-B002':[{commitDate:'2025-04-21',trxNo:'TRX-031',recvNo:'RCV-D002',sn:'SN-D002',grn:'GRN-D002'}]
+      }}
+    }
+  }
+};
+
+var AI = {};
+
+function renderArchImport(){
+  setHdr('歸檔標籤製作 — 進口貨','ti-plane-arrival',true);
+  setSteps([{icon:'ti-forms',label:'資料輸入'},{icon:'ti-barcode',label:'預覽確認'},{icon:'ti-check',label:'完成'}],1);
+  AI={};
+
+  var uDecls=[...new Set(CUSTOMS.map(function(r){return r.decl;}))];
+  var uMswbs=[...new Set(CUSTOMS.map(function(r){return r.mswb;}))];
+  var uHawbs=[...new Set(CUSTOMS.map(function(r){return r.hawb;}))];
+  var poList=Object.keys(AI_DATA);
+  function mkOpts(arr,ph){return'<option value="">'+ph+'</option>'+arr.map(function(v){return'<option value="'+v+'">'+v+'</option>';}).join('');}
+
+  el('sub-body').innerHTML=
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-calendar"></i>到貨日期</div></div><div class="card-bd">'+
+      '<div class="field" style="margin-bottom:0"><label>到貨日期<span class="req">*</span></label><input type="date" id="f-ai-arrive"></div>'+
+    '</div></div>'+
+
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-file-invoice"></i>群組一 — 報關資訊（三選一帶出）</div></div><div class="card-bd">'+
+      '<div class="group-note"><i class="ti ti-info-circle"></i>選擇任一欄位，系統自動帶出其餘兩個</div>'+
+      '<div class="group-box"><div class="group-lbl"><i class="ti ti-file-description"></i>報單號碼</div>'+
+        '<div class="field" style="margin-bottom:0"><select id="f-ai-decl" onchange="aiSync(&quot;decl&quot;)">'+mkOpts(uDecls,'— 請選擇報單號碼 —')+'</select></div></div>'+
+      '<div class="group-box"><div class="group-lbl"><i class="ti ti-building-warehouse"></i>MAWB 主提單</div>'+
+        '<div class="field" style="margin-bottom:0"><select id="f-ai-mawb" onchange="aiSync(&quot;mawb&quot;)">'+mkOpts(uMswbs,'— 請選擇 MAWB 主提單 —')+'</select></div></div>'+
+      '<div class="group-box" style="margin-bottom:0"><div class="group-lbl"><i class="ti ti-plane-arrival"></i>HAWB 分提單</div>'+
+        '<div class="field" style="margin-bottom:0"><select id="f-ai-hawb" onchange="aiSync(&quot;hawb&quot;)">'+mkOpts(uHawbs,'— 請選擇 HAWB 分提單 —')+'</select></div></div>'+
+    '</div></div>'+
+
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-shopping-cart"></i>群組二 — 採購資訊</div></div><div class="card-bd">'+
+      '<div class="divider">步驟 1：選擇採購單號 → 項次 → 報關件號</div>'+
+      '<div class="field"><label>採購單號<span class="req">*</span></label><select id="f-ai-po" onchange="aiItems()">'+mkOpts(poList,'— 請選擇採購單號 —')+'</select></div>'+
+      '<div class="row2">'+
+        '<div class="field"><label>項次<span class="req">*</span></label><select id="f-ai-item" onchange="aiPNs()"><option value="">— 請先選採購單 —</option></select></div>'+
+        '<div class="field"><label>報關件號<span class="req">*</span></label><select id="f-ai-pn" onchange="aiLots()"><option value="">— 請先選項次 —</option></select></div>'+
+      '</div>'+
+      '<div id="ai-step2-wrap" class="hidden">'+
+        '<div class="divider" style="margin-top:16px;">步驟 2：選擇 Commit Date 或 TRX NO（知其一帶出另一）</div>'+
+        '<div class="row2">'+
+          '<div class="field"><label>Commit Date<span class="req">*</span></label><select id="f-ai-cd" onchange="aiSyncTrx(&quot;cd&quot;)"><option value="">— 請選擇 —</option></select></div>'+
+          '<div class="field"><label>TRX NO</label><select id="f-ai-trx" onchange="aiSyncTrx(&quot;trx&quot;)"><option value="">— 自動帶出 —</option></select></div>'+
+        '</div>'+
+      '</div>'+
+    '</div></div>'+
+
+    '<div id="ai-g3-card" class="card hidden"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-package-check"></i>群組三 — 接收資訊（依 Commit Date / TRX NO 帶出）</div></div><div class="card-bd">'+
+      '<div class="field"><label>實際接收件號<span class="req">*</span></label><select id="f-ai-recv" onchange="aiRecvChange()"><option value="">— 請先完成群組二 —</option></select></div>'+
+      '<div class="row2">'+
+        '<div class="field"><label>SN</label><input type="text" id="f-ai-sn" readonly tabindex="-1" style="background:var(--local-bg);color:var(--local-txt);border-color:var(--local-bd);" placeholder="自動帶出"></div>'+
+        '<div class="field"><label>GRN</label><input type="text" id="f-ai-grn" readonly tabindex="-1" style="background:var(--local-bg);color:var(--local-txt);border-color:var(--local-bd);" placeholder="自動帶出"></div>'+
+      '</div>'+
+    '</div></div>'+
+
+    '<div id="ai-err" class="err-msg hidden"><i class="ti ti-alert-circle"></i><span id="ai-err-m"></span></div>'+
+    '<button class="btn-p" onclick="aiSubmit()"><i class="ti ti-barcode"></i>建立條碼並預覽</button>';
+
+  el('f-ai-arrive').value=today;
+}
+
+// ── 群組一：三選一 ──
+window.aiSync=function(src){
+  var d=val('f-ai-decl'),m=val('f-ai-mawb'),h=val('f-ai-hawb'),found=null;
+  if(src==='decl'&&d)found=CUSTOMS.find(function(r){return r.decl===d;});
+  else if(src==='hawb'&&h)found=CUSTOMS.find(function(r){return r.hawb===h;});
+  else if(src==='mawb'&&m){
+    var ms=CUSTOMS.filter(function(r){return r.mswb===m;});
+    if(ms.length===1){found=ms[0];}
+    else if(ms.length>1){
+      var hs=el('f-ai-hawb');hs.innerHTML='<option value="">— 請選擇 HAWB 分提單 —</option>';
+      ms.forEach(function(r){hs.innerHTML+='<option value="'+r.hawb+'">'+r.hawb+'</option>';});
+      el('f-ai-decl').value='';
+      ['decl','mawb','hawb'].forEach(function(k){var e=el('f-ai-'+k);if(e){e.style.background='';e.style.borderColor='';e.style.color='';}});
+      return;
+    }
+  }
+  if(found){
+    el('f-ai-decl').value=found.decl;el('f-ai-mawb').value=found.mswb;el('f-ai-hawb').value=found.hawb;
+    ['decl','mawb','hawb'].forEach(function(k){var e=el('f-ai-'+k);if(!e)return;e.style.background=k===src?'':'var(--local-bg)';e.style.borderColor=k===src?'':'var(--local-bd)';e.style.color=k===src?'':'var(--local-txt)';});
+  }
+};
+
+// ── 群組二：連動下拉 ──
+window.aiItems=function(){
+  var po=val('f-ai-po'),items=po&&AI_DATA[po]?Object.keys(AI_DATA[po].items):[];
+  var s=el('f-ai-item');s.innerHTML='<option value="">'+(po?'— 請選擇項次 —':'— 請先選採購單 —')+'</option>';
+  items.forEach(function(v){s.innerHTML+='<option value="'+v+'">'+v+'</option>';});
+  el('f-ai-pn').innerHTML='<option value="">— 請先選項次 —</option>';
+  aiResetStep2();aiResetG3();
+};
+window.aiPNs=function(){
+  var po=val('f-ai-po'),it=val('f-ai-item'),pns=po&&it&&AI_DATA[po]&&AI_DATA[po].items[it]?AI_DATA[po].items[it].pns:[];
+  var s=el('f-ai-pn');s.innerHTML='<option value="">'+(it?'— 請選擇報關件號 —':'— 請先選項次 —')+'</option>';
+  pns.forEach(function(v){s.innerHTML+='<option value="'+v+'">'+v+'</option>';});
+  aiResetStep2();aiResetG3();
+};
+window.aiLots=function(){
+  var po=val('f-ai-po'),it=val('f-ai-item'),pn=val('f-ai-pn');
+  aiResetStep2();aiResetG3();
+  if(!po||!it||!pn)return;
+  var lots=AI_DATA[po]&&AI_DATA[po].items[it]&&AI_DATA[po].items[it].lots[pn]?AI_DATA[po].items[it].lots[pn]:[];
+  AI.lots=lots;
+  if(!lots.length){el('ai-step2-wrap').innerHTML+='<div class="not-found" style="margin-top:8px;"><i class="ti ti-alert-triangle"></i>查無對應批次記錄</div>';return;}
+  // Populate Commit Date dropdown
+  var cdSel=el('f-ai-cd');cdSel.innerHTML='<option value="">— 請選擇 Commit Date —</option>';
+  var seen={};
+  lots.forEach(function(l){if(!seen[l.commitDate]){cdSel.innerHTML+='<option value="'+l.commitDate+'">'+l.commitDate+'</option>';seen[l.commitDate]=true;}});
+  el('f-ai-trx').innerHTML='<option value="">— 自動帶出 —</option>';
+  show('ai-step2-wrap');
+};
+
+// ── 步驟2：Commit Date ↔ TRX NO ──
+window.aiSyncTrx=function(src){
+  if(!AI.lots||!AI.lots.length)return;
+  var cd=val('f-ai-cd'),trx=val('f-ai-trx');
+  var matchLots=[];
+  if(src==='cd'&&cd){
+    matchLots=AI.lots.filter(function(l){return l.commitDate===cd;});
+    // populate TRX dropdown
+    var trxSel=el('f-ai-trx');trxSel.innerHTML='<option value="">— 請選擇 TRX NO —</option>';
+    var seen={};matchLots.forEach(function(l){if(!seen[l.trxNo]){trxSel.innerHTML+='<option value="'+l.trxNo+'">'+l.trxNo+'</option>';seen[l.trxNo]=true;}});
+    trxSel.style.background='var(--local-bg)';trxSel.style.borderColor='var(--local-bd)';
+    aiResetG3();
+  } else if(src==='trx'&&trx){
+    var cdVal=val('f-ai-cd');
+    matchLots=AI.lots.filter(function(l){return l.trxNo===trx&&(!cdVal||l.commitDate===cdVal);});
+    if(!matchLots.length)matchLots=AI.lots.filter(function(l){return l.trxNo===trx;});
+    aiPopulateG3(matchLots);
+  }
+  if(src==='cd'&&!cd){el('f-ai-trx').innerHTML='<option value="">— 自動帶出 —</option>';el('f-ai-trx').style.background='';el('f-ai-trx').style.borderColor='';aiResetG3();}
+};
+
+function aiPopulateG3(lots){
+  var rs=el('f-ai-recv');if(!rs)return;
+  rs.innerHTML='<option value="">— 請選擇實際接收件號 —</option>';
+  lots.forEach(function(l){rs.innerHTML+='<option value="'+l.recvNo+'" data-sn="'+l.sn+'" data-grn="'+l.grn+'">'+l.recvNo+'</option>';});
+  el('f-ai-sn').value='';el('f-ai-grn').value='';
+  show('ai-g3-card');
+}
+window.aiRecvChange=function(){
+  var rs=el('f-ai-recv');if(!rs)return;
+  var opt=rs.options[rs.selectedIndex];
+  el('f-ai-sn').value=opt?opt.getAttribute('data-sn')||'':'';
+  el('f-ai-grn').value=opt?opt.getAttribute('data-grn')||'':'';
+};
+function aiResetStep2(){hide('ai-step2-wrap');var s=el('ai-step2-wrap');if(s){el('f-ai-cd').innerHTML='<option value="">— 請選擇 —</option>';el('f-ai-trx').innerHTML='<option value="">— 自動帶出 —</option>';el('f-ai-trx').style.background='';el('f-ai-trx').style.borderColor='';}}
+function aiResetG3(){var rs=el('f-ai-recv');if(rs)rs.innerHTML='<option value="">— 請先完成群組二 —</option>';var sn=el('f-ai-sn');if(sn)sn.value='';var grn=el('f-ai-grn');if(grn)grn.value='';hide('ai-g3-card');AI.lots=AI.lots||[];}
+
+// ── 送出 → 預覽 ──
+window.aiSubmit=function(){
+  var arrive=val('f-ai-arrive'),d=val('f-ai-decl'),m=val('f-ai-mawb'),h=val('f-ai-hawb');
+  var po=val('f-ai-po'),it=val('f-ai-item'),pn=val('f-ai-pn');
+  var cd=val('f-ai-cd'),trx=val('f-ai-trx'),recv=val('f-ai-recv');
+  if(!arrive){showErr('ai-err','ai-err-m','請填寫到貨日期');return;}
+  if(!d||!m||!h){showErr('ai-err','ai-err-m','請完成群組一報關資訊');return;}
+  if(!po||!it||!pn){showErr('ai-err','ai-err-m','請完成群組二：採購單號、項次及報關件號');return;}
+  if(!cd){showErr('ai-err','ai-err-m','請選擇 Commit Date');return;}
+  if(!recv){showErr('ai-err','ai-err-m','請選擇實際接收件號');return;}
+  hideErr('ai-err');
+  var sn=val('f-ai-sn'),grn=val('f-ai-grn');
+  AI.rec={arrive:arrive,decl:d,mawb:m,hawb:h,po:po,item:it,pn:pn,cd:cd,trx:trx||'—',recv:recv,sn:sn||'—',grn:grn||'—'};
+  var bv='DATE:'+arrive.replace(/-/g,'')+'|DECL:'+d.replace(/[^A-Z0-9]/gi,'')+'|PO:'+po.replace(/[^A-Z0-9]/gi,'')+'|RECV:'+recv.replace(/[^A-Z0-9]/gi,'');
+  AI.bv=bv;goStep(2);
+  el('sub-body').innerHTML=
+    '<div class="preview-box"><div class="preview-lbl"><i class="ti ti-eye" style="font-size:13px;"></i>條碼預覽 — 請確認內容後執行列印</div>'+
+      '<div class="bc-area"><svg id="ai-bc" width="260" height="70" viewBox="0 0 260 70" xmlns="http://www.w3.org/2000/svg"></svg><div class="bc-no" id="ai-bc-n"></div></div>'+
+      '<div class="info-grid" id="ai-ig"></div>'+
+    '</div>'+
+    '<button class="btn-p" onclick="aiPrint()"><i class="ti ti-printer"></i>確認無誤，執行列印</button>'+
+    '<button class="btn-s" onclick="renderArchImport()"><i class="ti ti-arrow-left"></i>返回修改資料</button>';
+  setTimeout(function(){
+    renderBarcode('ai-bc','ai-bc-n',bv);
+    var r=AI.rec;
+    el('ai-ig').innerHTML=infoGrid([
+      {l:'到貨日期',v:r.arrive,full:true},
+      {l:'報單號碼',v:r.decl,full:true},
+      {l:'MAWB 主提單',v:r.mawb},{l:'HAWB 分提單',v:r.hawb},
+      {l:'採購單號',v:r.po,full:true},
+      {l:'項次',v:r.item},{l:'報關件號',v:r.pn},
+      {l:'Commit Date',v:r.cd},{l:'TRX NO',v:r.trx},
+      {l:'實際接收件號',v:r.recv,full:true},
+      {l:'SN',v:r.sn},{l:'GRN',v:r.grn}
+    ]);
+  },50);
+};
+window.aiPrint=function(){
+  goStep(3);var bv=AI.bv,r=AI.rec;
+  el('sub-body').innerHTML=
+    '<div class="success-box"><i class="ti ti-circle-check"></i><p>列印指令已送出！</p><span>條碼標籤已傳送至印表機</span></div>'+
+    '<div class="preview-box"><div class="preview-lbl">本次列印條碼內容</div>'+
+      '<div class="bc-area"><svg id="ai-done-bc" width="260" height="70" viewBox="0 0 260 70" xmlns="http://www.w3.org/2000/svg"></svg><div class="bc-no" id="ai-done-n"></div></div>'+
+      '<div class="info-grid" style="margin-top:10px;">'+infoGrid([
+        {l:'到貨日期',v:r.arrive,full:true},{l:'報單號碼',v:r.decl,full:true},
+        {l:'MAWB',v:r.mawb},{l:'HAWB',v:r.hawb},
+        {l:'採購單號',v:r.po,full:true},{l:'項次',v:r.item},{l:'報關件號',v:r.pn},
+        {l:'Commit Date',v:r.cd},{l:'TRX NO',v:r.trx},
+        {l:'實際接收件號',v:r.recv,full:true},{l:'SN',v:r.sn},{l:'GRN',v:r.grn}
+      ])+'</div>'+
+    '</div>'+
+    '<button class="btn-p" onclick="renderArchImport()"><i class="ti ti-refresh"></i>繼續製作下一張</button>'+
+    '<button class="btn-s" onclick="navBack()"><i class="ti ti-arrow-left"></i>返回歸檔標籤選單</button>';
+  setTimeout(function(){renderBarcode('ai-done-bc','ai-done-n',bv);},50);
+};
+
+// ══════════════════════════════════════════════
+// SHARED UPLOAD & DONE HTML
+// ══════════════════════════════════════════════
+function recSumRows(data){
+  return Object.keys(data).map(function(k){
+    var labels={date:'拍攝日',invoice:'Invoice NO',line:'Line',pn:'PN',sn:'SN',note:'Note',arrive:'到貨日',decl:'報單號碼',mswb:'MSWB 主提單',hawb:'HAWB 分提單',po:'採購單號',item:'項次',shop:'SHOP',wo:'Package ID / WO',mode:'類型',mawb:'MAWB 主提單',tx:'TX 項次',to:'To 單號'};
+    return'<tr><td>'+(labels[k]||k)+'</td><td>'+(data[k]||'—')+'</td></tr>';
+  }).join('');
+}
+function uploadHTML(pfx,addFn,rmFn,data,errId,errMid,uploadFn,backFn){
+  var rows=recSumRows(data);
+  return '<div class="rec-sum"><table>'+rows+'</table></div>'+
+    '<div class="card"><div class="card-hd"><div class="card-hd-l"><i class="ti ti-upload"></i>影像上傳</div></div><div class="card-bd">'+
+      '<div class="upload-zone" onclick="document.getElementById(\''+pfx+'-file-input\').click()">'+
+        '<i class="ti ti-photo-up"></i><p>點擊選擇或拖曳影像至此</p><span>支援照片與影片，單檔最大為 10MB</span>'+
+      '</div>'+
+      '<input type="file" id="'+pfx+'-file-input" multiple accept="image/*,video/*" style="display:none">'+
+      '<div class="file-list" id="'+pfx+'-file-list"></div>'+
+      '<div id="'+errId+'" class="err-msg hidden" style="margin-top:8px;"><i class="ti ti-alert-circle"></i><span id="'+errMid+'"></span></div>'+
+    '</div></div>'+
+    '<button class="btn-p" onclick="'+uploadFn+'()"><i class="ti ti-cloud-upload"></i>確認上傳完成</button>'+
+    '<button class="btn-s" onclick="'+backFn+'()"><i class="ti ti-arrow-left"></i>返回修改資料</button>';
+}
+function doneHTML(n,nextFn,labelScreen){
+  return '<div class="success-box"><i class="ti ti-circle-check"></i><p>上傳完成！</p><span>已上傳 '+n+' 個檔案，資料已成功儲存。</span></div>'+
+    '<button class="btn-p" onclick="'+nextFn+'()"><i class="ti ti-plus"></i>繼續輸入下一筆</button>'+
+    '<button class="btn-s" onclick="nav(\''+labelScreen+'\')"><i class="ti ti-printer"></i>執行文件歸檔標籤印製</button>';
+}
+function addFiles(nf,arr,listId,rmFn,errId,errMid){
+  var max=10*1024*1024;
+  for(var i=0;i<nf.length;i++){
+    if(nf[i].size>max){showErr(errId,errMid,'「'+nf[i].name+'」超過 10MB 限制，已略過');continue;}
+    arr.push(nf[i]);
+  }
+  renderFiles(listId,arr,rmFn);
+  if(arr.length)hideErr(errId);
+}
+</script>
+</body>
+</html>
