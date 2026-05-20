@@ -7,7 +7,7 @@
 |[接收文件行動端(第一款)](https://imflorayau-lab.github.io/starlux/STARLUX_01.html) | 2026.05.12| |
 |[接收文件行動端(第二款)](https://imflorayau-lab.github.io/starlux/STARLUX_02.html)| 2026.05.12| |
 |[影像管理後台](https://imflorayau-lab.github.io/starlux/SJX_DTMS.html) | 2026.05.19| |
-|[影像管理後台](https://imflorayau-lab.github.io/starlux/SJX_DTMS.html) | 2026.05.20|增加<br>1. 報單上傳；<br>2.系統管理>接收文件代碼<br>3. 外運調整Note欄位顯示。按編號可以看內容|
+|[影像管理後台](https://imflorayau-lab.github.io/starlux/SJX_DTMS_20260520.html) | 2026.05.20|增加<br>1. 報單上傳；<br>2.系統管理>接收文件代碼<br>3. 外運調整Note欄位顯示。按編號可以看內容|
 
 
 
