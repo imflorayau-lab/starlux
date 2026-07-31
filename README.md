@@ -4,7 +4,7 @@
 
 | 名稱                                                                                         | 版本日期   | 說明                   |
 | -------------------------------------------------------------------------------------------- | ---------- | ---------------------- |
-| [行動端(2026.07.16)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20260716.html) | 2026.07.16 | 帳號:admin, 密碼:admin<br>1. 補充標籤列印；<br>2.增加功能編號；<br>3. 修正影像上傳功能介面 |
+| [行動端(2026.07.31)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20260731.html) | 2026.07.31 | 帳號:admin, 密碼:admin<br>1. 補充標籤列印；<br>2.增加功能編號；<br>3. 修正影像上傳功能介面<br>4.調整共用GRN時的標籤列印方式 |
 | [行動端(2026.05.28)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20260528.html) | 2026.05.28 |                       |
 | [行動端(第一款)](https://imflorayau-lab.github.io/starlux/STARLUX_01.html)                   | 2026.05.12 |                        |
 | [行動端(第二款)](https://imflorayau-lab.github.io/starlux/STARLUX_02.html)                   | 2026.05.12 |                        |
@@ -13,7 +13,7 @@
 
 | 名稱                                                                                        | 版本日期   | 說明                                                                                                                                                                                            |
 | ------------------------------------------------------------------------------------------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [影像管理後台(2026.07.29)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_20260729.html) | 2026.07.29 |調整<br>1. 接收文件SDS呈現;<br>2. 查詢條件群組化;  <br>3. Shop Repair移除PME; <br>4.  
+| [影像管理後台(2026.07.31)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_20260731.html) | 2026.07.31 |調整<br>1. 接收文件SDS呈現;<br>2. 查詢條件群組化;  <br>3. Shop Repair移除PME;   
 
 | [影像管理後台(2026.06.29)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_20260629.html) | 2026.06.29 |調整<br>1. 移倉調撥>查詢結果TQ、TQ呈現                                                                                                                                                                                                |
 | [影像管理後台(2026.05.28)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_20260528.html) | 2026.05.28 |                                                                                                                                                                                                 |
