@@ -4,7 +4,7 @@
 
 | 名稱                                                                                         | 版本日期   | 說明                   |
 | -------------------------------------------------------------------------------------------- | ---------- | ---------------------- |
-| [行動端(2026.09.24)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20260924.html)| 2026.09.24 | WO 0332279|
+| [行動端(2026.09.24)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20260924.html)| 2026.09.24 | WO 0332279<br>調整報單條碼、進口條碼、SDS條碼|
 | [行動端(2026.07.31)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20260731.html) | 2026.07.31 | 帳號:admin, 密碼:admin<br>1. 補充標籤列印；<br>2.增加功能編號；<br>3. 修正影像上傳功能介面<br>4.調整共用GRN時的標籤列印方式 |
 | [行動端(2026.05.28)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20260528.html) | 2026.05.28 |                       |
 | [行動端(第一款)](https://imflorayau-lab.github.io/starlux/STARLUX_01.html)                   | 2026.05.12 |                        |
