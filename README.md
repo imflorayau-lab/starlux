@@ -4,6 +4,7 @@
 
 | 名稱                                                                                         | 版本日期   | 說明                   |
 | -------------------------------------------------------------------------------------------- | ---------- | ---------------------- |
+| [行動端(2026.10.22)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20261022.html)| 2026.10.22 | 1. 調整 外運 影像上傳 作業流程] |
 | [行動端(2026.10.14)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20261014.html)| 2026.10.14 | 1. 報單標籤增加[勾選全選未列印] |
 | [行動端(2026.09.24)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20260924.html)| 2026.09.24 | 調整報單條碼、進口條碼、SDS條碼<br>調整PME SHOPWO 0332279<br>|
 | [行動端(2026.07.31)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20260731.html) | 2026.07.31 | 帳號:admin, 密碼:admin<br>1. 補充標籤列印；<br>2.增加功能編號；<br>3. 修正影像上傳功能介面<br>4.調整共用GRN時的標籤列印方式 |
