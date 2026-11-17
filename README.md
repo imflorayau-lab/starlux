@@ -4,6 +4,7 @@
 
 | 名稱                                                                                         | 版本日期   | 說明                   |
 | -------------------------------------------------------------------------------------------- | ---------- | ---------------------- |
+| [行動端(2026.11.17)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20261117.html)| 2026.11.11 | 1. 調整112, 122 國內貨影像上傳跟標籤列印] |
 | [行動端(2026.11.11)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20261111.html)| 2026.11.11 | 1. 調整SDS標籤列印] |
 | [行動端(2026.10.22)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20261022.html)| 2026.10.22 | 1. 調整 外運 影像上傳 作業流程] |
 | [行動端(2026.10.14)](https://imflorayau-lab.github.io/starlux/SJX_DTMS_device_20261014.html)| 2026.10.14 | 1. 報單標籤增加[勾選全選未列印] |
